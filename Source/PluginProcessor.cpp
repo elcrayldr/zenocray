@@ -62,6 +62,24 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
   parameters(*this,nullptr,"CRAY_STATE",makeParams()) {
     for(int i=0;i<static_cast<int>(synthVoices.size());++i){synthVoices[static_cast<size_t>(i)]=new cray::SynthVoice();synth.addVoice(synthVoices[static_cast<size_t>(i)]);}
     synth.addSound(new cray::SynthSound());
+    cached.attack=parameters.getRawParameterValue("attack");
+    cached.decay=parameters.getRawParameterValue("decay");
+    cached.sustain=parameters.getRawParameterValue("sustain");
+    cached.release=parameters.getRawParameterValue("release");
+    cached.cutoff=parameters.getRawParameterValue("cutoff");
+    cached.resonance=parameters.getRawParameterValue("resonance");
+    cached.masterLevel=parameters.getRawParameterValue("level");
+    cached.drive=parameters.getRawParameterValue("drive");
+    cached.width=parameters.getRawParameterValue("width");
+    cached.samplerLevel=parameters.getRawParameterValue("samplerLevel");
+    cached.sampleRoot=parameters.getRawParameterValue("sampleRoot");
+    for(int osc=0;osc<4;++osc){
+        const auto n=juce::String(osc+1);
+        cached.oscillatorLevel[static_cast<size_t>(osc)]=parameters.getRawParameterValue("osc"+n+"Level");
+        cached.oscillatorSemitone[static_cast<size_t>(osc)]=parameters.getRawParameterValue("osc"+n+"Semi");
+        cached.oscillatorFine[static_cast<size_t>(osc)]=parameters.getRawParameterValue("osc"+n+"Fine");
+        cached.oscillatorWave[static_cast<size_t>(osc)]=parameters.getRawParameterValue("osc"+n+"Wave");
+    }
 }
 
 CRAYLDRUrbanInstrumentsAudioProcessor::~CRAYLDRUrbanInstrumentsAudioProcessor() {
@@ -94,24 +112,25 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::isBusesLayoutSupported(const BusesLa
 void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,MidiBuffer& m) {
     ScopedNoDenormals noDenormals;
     for(int c=getTotalNumInputChannels();c<getTotalNumOutputChannels();++c) b.clear(c,0,b.getNumSamples());
-    const auto get=[this](const juce::String& id){return parameters.getRawParameterValue(id)->load();};
+    const auto load=[](const std::atomic<float>* value){return value->load(std::memory_order_relaxed);};
     for(auto* voice:synthVoices) {
         if(voice!=nullptr) {
-            voice->setParameters(get("attack"),get("decay"),get("sustain"),get("release"),get("cutoff"),get("resonance"),get("level"));
+            voice->setParameters(load(cached.attack),load(cached.decay),load(cached.sustain),load(cached.release),
+                                 load(cached.cutoff),load(cached.resonance),load(cached.masterLevel));
             for(int osc=0;osc<4;++osc) {
-                const auto n=juce::String(osc+1);
-                voice->setOscillator(osc,get("osc"+n+"Level"),get("osc"+n+"Semi"),get("osc"+n+"Fine"),
-                                     static_cast<int>(get("osc"+n+"Wave")));
+                const auto index=static_cast<size_t>(osc);
+                voice->setOscillator(osc,load(cached.oscillatorLevel[index]),load(cached.oscillatorSemitone[index]),
+                                     load(cached.oscillatorFine[index]),static_cast<int>(load(cached.oscillatorWave[index])));
             }
         }
     }
     b.clear();
     synth.renderNextBlock(b,m,0,b.getNumSamples());
-    sampler.setLevel(get("samplerLevel"));
-    sampler.setRootNote(static_cast<int>(get("sampleRoot")));
+    sampler.setLevel(load(cached.samplerLevel));
+    sampler.setRootNote(static_cast<int>(load(cached.sampleRoot)));
     sampler.processBlock(b,m);
-    effects.setDrive(get("drive"));
-    effects.setWidth(get("width"));
+    effects.setDrive(load(cached.drive));
+    effects.setWidth(load(cached.width));
     effects.process(b);
 }
 
