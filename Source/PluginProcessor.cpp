@@ -65,6 +65,36 @@ static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce
     return true;
 }
 
+static juce::ValueTree makeStateWithSampleZones(juce::AudioProcessorValueTreeState& parameters,const std::vector<cray::SamplerEngine::ZoneInfo>& zones) {
+    auto state=parameters.copyState();
+    state.setProperty("schemaVersion",2,nullptr);
+    juce::ValueTree zoneList("SAMPLE_ZONES");
+    for(const auto& zone:zones) {
+        juce::ValueTree item("ZONE");
+        item.setProperty("filePath",zone.filePath,nullptr);
+        item.setProperty("rootNote",zone.rootNote,nullptr);
+        zoneList.addChild(item,-1,nullptr);
+    }
+    state.addChild(zoneList,-1,nullptr);
+    return state;
+}
+
+static std::vector<cray::SamplerEngine::ZoneInfo> extractSampleZones(juce::ValueTree& state) {
+    std::vector<cray::SamplerEngine::ZoneInfo> zones;
+    const auto zoneList=state.getChildWithName("SAMPLE_ZONES");
+    if(zoneList.isValid()) {
+        for(int i=0;i<zoneList.getNumChildren();++i) {
+            const auto item=zoneList.getChild(i);
+            cray::SamplerEngine::ZoneInfo zone;
+            zone.filePath=item.getProperty("filePath").toString();
+            zone.rootNote=static_cast<int>(item.getProperty("rootNote"));
+            if(zone.filePath.isNotEmpty())zones.push_back(std::move(zone));
+        }
+        state.removeChild(zoneList,nullptr);
+    }
+    return zones;
+}
+
 CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
 : AudioProcessor(BusesProperties().withOutput("Output",AudioChannelSet::stereo(),true)),
   parameters(*this,nullptr,"CRAY_STATE",makeParams()) {
@@ -166,12 +196,18 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
 
 juce::AudioProcessorEditor* CRAYLDRUrbanInstrumentsAudioProcessor::createEditor(){return new CRAYLDRUrbanInstrumentsAudioProcessorEditor(*this);}
 void CRAYLDRUrbanInstrumentsAudioProcessor::getStateInformation(MemoryBlock& dest) {
-    auto state=parameters.copyState();state.setProperty("schemaVersion",2,nullptr);
-    std::unique_ptr<XmlElement> xml(state.createXml());copyXmlToBinary(*xml,dest);
+    auto state=makeStateWithSampleZones(parameters,getSampleZones());
+    std::unique_ptr<XmlElement> xml(state.createXml());
+    if(xml!=nullptr)copyXmlToBinary(*xml,dest);
 }
 void CRAYLDRUrbanInstrumentsAudioProcessor::setStateInformation(const void* data,int size) {
     std::unique_ptr<XmlElement> xml(getXmlFromBinary(data,size));
-    if(xml&&xml->hasTagName(parameters.state.getType()))parameters.replaceState(juce::ValueTree::fromXml(*xml));
+    if(xml&&xml->hasTagName(parameters.state.getType())) {
+        auto state=juce::ValueTree::fromXml(*xml);
+        auto zones=extractSampleZones(state);
+        if(state.isValid())parameters.replaceState(state);
+        restoreSampleZones(zones);
+    }
 }
 juce::File CRAYLDRUrbanInstrumentsAudioProcessor::getUserPresetDirectory() const {
     auto dir=juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -181,8 +217,7 @@ juce::File CRAYLDRUrbanInstrumentsAudioProcessor::getUserPresetDirectory() const
 }
 
 bool CRAYLDRUrbanInstrumentsAudioProcessor::savePresetToFile(const juce::File& file,juce::String& error) {
-    auto state=parameters.copyState();
-    state.setProperty("schemaVersion",2,nullptr);
+    auto state=makeStateWithSampleZones(parameters,getSampleZones());
     std::unique_ptr<juce::XmlElement> xml(state.createXml());
     if(xml==nullptr||!xml->writeTo(file)){error="Could not write preset file.";return false;}
     error.clear();
@@ -196,7 +231,9 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File&
     if(xml==nullptr||!xml->hasTagName(parameters.state.getType())){error="Invalid CRAY LDR preset file.";return false;}
     auto state=juce::ValueTree::fromXml(*xml);
     if(!state.isValid()){error="Preset state is invalid.";return false;}
+    auto zones=extractSampleZones(state);
     parameters.replaceState(state);
+    restoreSampleZones(zones);
     error.clear();
     return true;
 }
