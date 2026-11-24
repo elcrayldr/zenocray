@@ -7,7 +7,7 @@
 class CRAYLDRUrbanInstrumentsAudioProcessor final : public juce::AudioProcessor {
 public:
     CRAYLDRUrbanInstrumentsAudioProcessor();
-    ~CRAYLDRUrbanInstrumentsAudioProcessor() override = default;
+    ~CRAYLDRUrbanInstrumentsAudioProcessor() override;
     void prepareToPlay(double, int) override;
     void releaseResources() override {}
     bool isBusesLayoutSupported(const BusesLayout&) const override;
@@ -27,7 +27,7 @@ public:
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int) override;
     juce::AudioProcessorValueTreeState parameters;
-    bool loadSampleFromFile(const juce::File& file, juce::String& error) { return sampler.loadSampleFromFile(file, error); }
+    void loadSampleFromFileAsync(const juce::File& file, std::function<void(bool, juce::String)> completion);
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
     const std::array<float,256>& getSamplePreview() const noexcept { return sampler.getPreviewData(); }
     bool savePresetToFile(const juce::File& file, juce::String& error);
@@ -38,6 +38,7 @@ private:
     juce::Synthesiser synth;
     cray::BasicEffects effects;
     cray::SamplerEngine sampler;
+    juce::ThreadPool sampleLoader{1};
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessor)
 };
