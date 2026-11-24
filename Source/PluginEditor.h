@@ -2,15 +2,17 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-class CRAYLDRUrbanInstrumentsAudioProcessorEditor final : public juce::AudioProcessorEditor {
+class CRAYLDRUrbanInstrumentsAudioProcessorEditor final : public juce::AudioProcessorEditor, private juce::Timer {
 public:
  explicit CRAYLDRUrbanInstrumentsAudioProcessorEditor(CRAYLDRUrbanInstrumentsAudioProcessor&);
  void paint(juce::Graphics&) override;
  void resized() override;
+ void timerCallback() override;
 private:
  using Slider=juce::Slider;
  CRAYLDRUrbanInstrumentsAudioProcessor& processor;
  juce::Label title,subtitle,sampleStatus,lfoDestinationLabel;
+ juce::String lastSampleName;
  juce::TextButton loadSampleButton{"LOAD SAMPLE"},savePresetButton{"SAVE PRESET"},loadPresetButton{"LOAD PRESET"},clearSampleButton{"CLEAR ZONES"};
  juce::ComboBox factoryPresetSelector;
  std::unique_ptr<juce::FileChooser> presetChooser;
