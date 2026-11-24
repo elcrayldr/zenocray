@@ -9,7 +9,7 @@
 ## Realtime constraints
 
 - Audio-thread code must not allocate, perform file I/O, block on locks, or access UI objects.
-- Sample file decoding and waveform overview calculation occur in the editor/message-thread import path, not in the audio callback.
+- Sample file decoding and waveform overview calculation run on a dedicated background worker, not in the audio callback or the editor/message thread.
 - Sample buffers are immutable after publication and retained for the lifetime of the processor so active sample voices never observe freed memory. Repeated imports therefore consume memory until the plugin instance is closed; the loader has a five-minute per-file limit and a 512 MB retained-sample budget per plugin instance.
 - Parameter changes remain host-automatable through APVTS.
 - State is serialized as XML with a schema version. User preset files use .craypreset; factory JSON presets are mapped by parameter ID.
