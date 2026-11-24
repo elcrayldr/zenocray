@@ -2,8 +2,12 @@
 #include <cmath>
 
 namespace cray {
+SamplerEngine::SamplerEngine(){for(auto& zone:sampleZones)zone.store(nullptr,std::memory_order_relaxed);}
+
 bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& error) {
  if(!file.existsAsFile()){error="File does not exist.";return false;}
+ const int zoneIndex=sampleZoneCount.load(std::memory_order_acquire);
+ if(zoneIndex>=maxZones){error="Maximum of 16 sample root zones reached.";return false;}
  juce::AudioFormatManager formats;formats.registerBasicFormats();
  std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(file));
  if(!reader){error="Unsupported audio format. Use WAV, AIFF or FLAC.";return false;}
@@ -16,6 +20,7 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  auto data=std::make_unique<SampleData>();
  data->audio.setSize(channels,static_cast<int>(reader->lengthInSamples));
  data->sampleRate=reader->sampleRate;
+ data->rootNote=rootNote.load(std::memory_order_relaxed);
  data->name=file.getFileName();
  if(!reader->read(&data->audio,0,static_cast<int>(reader->lengthInSamples),0,true,channels>1)){
   error="Could not decode audio file.";return false;
@@ -31,6 +36,8 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  auto* raw=data.get();
  ownedSamples.push_back(std::move(data));
  ownedSampleBytes+=requiredBytes;
+ sampleZones[static_cast<size_t>(zoneIndex)].store(raw,std::memory_order_release);
+ sampleZoneCount.store(zoneIndex+1,std::memory_order_release);
  activeSample.store(raw,std::memory_order_release);
  {const juce::ScopedLock lock(previewLock);previewData=newPreview;loadedName=file.getFileName();}
  error.clear();
@@ -43,13 +50,19 @@ std::array<float,256> SamplerEngine::getPreviewData() const {const juce::ScopedL
 void SamplerEngine::prepare(double sampleRate) noexcept {hostSampleRate=sampleRate>0.0?sampleRate:44100.0;}
 
 void SamplerEngine::noteOn(int note,float velocity) noexcept {
- auto* sample=activeSample.load(std::memory_order_acquire);
+ SampleData* sample=nullptr;
+ int closestDistance=128;
+ const int zoneCount=sampleZoneCount.load(std::memory_order_acquire);
+ for(int i=0;i<zoneCount;++i){
+  auto* candidate=sampleZones[static_cast<size_t>(i)].load(std::memory_order_acquire);
+  if(candidate!=nullptr){const int distance=std::abs(note-candidate->rootNote);if(distance<closestDistance){closestDistance=distance;sample=candidate;}}
+ }
  if(sample==nullptr||sample->audio.getNumSamples()==0)return;
  Voice* target=nullptr;
  for(auto& v:voices)if(!v.active){target=&v;break;}
  if(target==nullptr)target=&voices[0];
  target->sample=sample;target->position=0.0;target->note=note;
- target->increment=(sample->sampleRate/hostSampleRate)*std::pow(2.0,static_cast<double>(note-rootNote.load(std::memory_order_relaxed))/12.0);
+ target->increment=(sample->sampleRate/hostSampleRate)*std::pow(2.0,static_cast<double>(note-sample->rootNote)/12.0);
  target->velocity=juce::jlimit(0.0f,1.0f,velocity);target->releaseRemaining=0;target->releaseTotal=0;target->active=true;
 }
 
