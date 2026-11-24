@@ -37,6 +37,7 @@ public:
     juce::File getUserPresetDirectory() const;
 private:
     juce::Synthesiser synth;
+    std::array<cray::SynthVoice*,64> synthVoices{};
     cray::BasicEffects effects;
     cray::SamplerEngine sampler;
     juce::ThreadPool sampleLoader{1};
