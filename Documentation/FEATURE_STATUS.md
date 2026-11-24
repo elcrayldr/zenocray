@@ -7,7 +7,7 @@
 | Oscillator anti-aliasing | Partial | PolyBLEP on saw and square; triangle remains naïve |
 | ADSR / low-pass filter | Basic implementation | Shared per-voice envelope and low-pass |
 | Polyphonic sample playback | Basic implementation | 32 voices, one sample mapped across keyboard; adjustable root note |
-| WAV / AIFF / FLAC import | Implemented via JUCE basic formats | Editor-thread decoding; 5-minute per-file and 512 MB retained-memory limits |
+| WAV / AIFF / FLAC import | Implemented via JUCE basic formats | Background worker decoding; 5-minute per-file and 512 MB retained-memory limits |
 | Sample waveform overview | Implemented | Peak overview; not yet a destructive editor |
 | Factory JSON presets | Loader implemented | Factory examples use current APVTS parameter IDs |
 | User preset save/load | Implemented | Versioned APVTS XML .craypreset files |
