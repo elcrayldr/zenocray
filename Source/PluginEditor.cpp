@@ -17,11 +17,11 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
 : AudioProcessorEditor(&p),processor(p) {
  setSize(1120,970);
  title.setText("CRAY LDR  /  URBAN INSTRUMENTS",juce::dontSendNotification);
- title.setFont(juce::Font(25.0f,juce::Font::bold));title.setColour(juce::Label::textColourId,yellow);addAndMakeVisible(title);
+ title.setFont(juce::Font(juce::FontOptions(25.0f,juce::Font::bold)));title.setColour(juce::Label::textColourId,yellow);addAndMakeVisible(title);
  subtitle.setText("FOUR-OSCILLATOR SYNTHESIS  •  64 VOICES",juce::dontSendNotification);
- subtitle.setFont(juce::Font(11.0f));subtitle.setColour(juce::Label::textColourId,muted);addAndMakeVisible(subtitle);
+ subtitle.setFont(juce::Font(juce::FontOptions(11.0f)));subtitle.setColour(juce::Label::textColourId,muted);addAndMakeVisible(subtitle);
  loadSampleButton.setColour(juce::TextButton::buttonColourId,yellow);loadSampleButton.setColour(juce::TextButton::textColourOffId,bg);addAndMakeVisible(loadSampleButton);
- sampleStatus.setText(processor.getLoadedSampleName(),juce::dontSendNotification);sampleStatus.setColour(juce::Label::textColourId,muted);sampleStatus.setFont(juce::Font(10.0f));addAndMakeVisible(sampleStatus);
+ sampleStatus.setText(processor.getLoadedSampleName(),juce::dontSendNotification);sampleStatus.setColour(juce::Label::textColourId,muted);sampleStatus.setFont(juce::Font(juce::FontOptions(10.0f)));addAndMakeVisible(sampleStatus);
  factoryPresetSelector.addItem("INIT SUB SINE",1);factoryPresetSelector.addItem("INIT URBAN SAW",2);
  factoryPresetSelector.setTextWhenNothingSelected("FACTORY PRESETS");
  factoryPresetSelector.setColour(juce::ComboBox::backgroundColourId,panel);factoryPresetSelector.setColour(juce::ComboBox::textColourId,juce::Colours::white);addAndMakeVisible(factoryPresetSelector);
@@ -118,7 +118,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  for(int i=0;i<4;++i){
   const int x=34+i*267;
   g.setColour(juce::Colour(0xff292c32));g.fillRoundedRectangle((float)x,354.0f,250.0f,320.0f,8.0f);
-  g.setColour(yellow);g.setFont(juce::Font(17.0f,juce::Font::bold));g.drawText("OSC 0"+juce::String(i+1),x+12,366,220,24,juce::Justification::left);
+  g.setColour(yellow);g.setFont(juce::Font(juce::FontOptions(17.0f,juce::Font::bold)));g.drawText("OSC 0"+juce::String(i+1),x+12,366,220,24,juce::Justification::left);
  }
 }
 
