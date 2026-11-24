@@ -29,6 +29,9 @@ public:
     void setStateInformation(const void*, int) override;
     juce::AudioProcessorValueTreeState parameters;
     void loadSampleFromFileAsync(const juce::File& file, std::function<void(bool, juce::String)> completion);
+    void loadSampleFromFileAsync(const juce::File& file, int rootNote, std::function<void(bool, juce::String)> completion);
+    std::vector<cray::SamplerEngine::ZoneInfo> getSampleZones() const { return sampler.getZoneInfos(); }
+    void restoreSampleZones(const std::vector<cray::SamplerEngine::ZoneInfo>& zones);
     void clearSampleZones() noexcept { sampler.clearZones(); }
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
     std::array<float,256> getSamplePreview() const { return sampler.getPreviewData(); }
