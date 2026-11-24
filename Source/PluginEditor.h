@@ -10,7 +10,9 @@ public:
 private:
  using Slider=juce::Slider;
  CRAYLDRUrbanInstrumentsAudioProcessor& processor;
- juce::Label title,subtitle;
+ juce::Label title,subtitle,sampleStatus;
+ juce::TextButton loadSampleButton{"LOAD SAMPLE"};
+ std::unique_ptr<juce::FileChooser> sampleChooser;
  std::array<Slider,9> globalControls;
  std::array<juce::Label,9> globalLabels;
  std::array<std::array<Slider,3>,4> oscillatorControls;
