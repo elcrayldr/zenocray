@@ -29,6 +29,9 @@ public:
     juce::AudioProcessorValueTreeState parameters;
     bool loadSampleFromFile(const juce::File& file, juce::String& error) { return sampler.loadSampleFromFile(file, error); }
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
+    bool savePresetToFile(const juce::File& file, juce::String& error);
+    bool loadPresetFromFile(const juce::File& file, juce::String& error);
+    juce::File getUserPresetDirectory() const;
 private:
     juce::Synthesiser synth;
     cray::BasicEffects effects;
