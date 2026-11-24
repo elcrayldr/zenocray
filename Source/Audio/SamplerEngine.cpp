@@ -6,6 +6,7 @@ SamplerEngine::SamplerEngine(){for(auto& zone:sampleZones)zone.store(nullptr,std
 
 bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& error) {
  if(!file.existsAsFile()){error="File does not exist.";return false;}
+ const unsigned int generation=zoneGeneration.load(std::memory_order_acquire);
  const int zoneIndex=sampleZoneCount.load(std::memory_order_acquire);
  if(zoneIndex>=maxZones){error="Maximum of 16 sample root zones reached.";return false;}
  juce::AudioFormatManager formats;formats.registerBasicFormats();
@@ -34,19 +35,22 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
   newPreview[static_cast<size_t>(bin)]=peak;
  }
  auto* raw=data.get();
- ownedSamples.push_back(std::move(data));
- ownedSampleBytes+=requiredBytes;
- sampleZones[static_cast<size_t>(zoneIndex)].store(raw,std::memory_order_release);
- sampleZoneCount.store(zoneIndex+1,std::memory_order_release);
- activeSample.store(raw,std::memory_order_release);
+ {
+  const juce::ScopedLock zoneGuard(zoneLock);
+  if(generation!=zoneGeneration.load(std::memory_order_acquire)){error="Import cancelled because sample zones were cleared.";return false;}
+  ownedSamples.push_back(std::move(data));
+  ownedSampleBytes+=requiredBytes;
+  sampleZones[static_cast<size_t>(zoneIndex)].store(raw,std::memory_order_release);
+  sampleZoneCount.store(zoneIndex+1,std::memory_order_release);
+  activeSample.store(raw,std::memory_order_release);
+ }
  {const juce::ScopedLock lock(previewLock);previewData=newPreview;loadedName=file.getFileName();}
  error.clear();
  return true;
 }
 
 void SamplerEngine::clearZones() noexcept {
- sampleZoneCount.store(0,std::memory_order_release);
- activeSample.store(nullptr,std::memory_order_release);
+ {const juce::ScopedLock zoneGuard(zoneLock);zoneGeneration.fetch_add(1,std::memory_order_acq_rel);sampleZoneCount.store(0,std::memory_order_release);activeSample.store(nullptr,std::memory_order_release);}
  const juce::ScopedLock lock(previewLock);
  previewData.fill(0.0f);
  loadedName="NO SAMPLE LOADED";
