@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <BinaryData.h>
 
 static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     using namespace juce;
@@ -23,6 +24,28 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
         p.add(std::make_unique<AudioParameterChoice>("osc"+suffix+"Wave","OSC "+suffix+" Wave",StringArray{"Sine","Saw","Square","Triangle","Noise"},i==1?1:0));
     }
     return p;
+}
+
+
+static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce::String& jsonText,juce::String& error) {
+    const auto parsed=juce::JSON::parse(jsonText);
+    auto* root=parsed.getDynamicObject();
+    if(root==nullptr){error="Invalid JSON preset.";return false;}
+    const auto values=root->getProperty("parameters");
+    auto* object=values.getDynamicObject();
+    if(object==nullptr){error="Preset has no parameters object.";return false;}
+    const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width",
+      "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
+      "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
+    for(const auto* id:ids) {
+        const auto value=object->getProperty(id);
+        if(!value.isVoid()) {
+            if(auto* parameter=dynamic_cast<juce::RangedAudioParameter*>(state.getParameter(id)))
+                parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(value)));
+        }
+    }
+    error.clear();
+    return true;
 }
 
 CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
@@ -95,26 +118,7 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::savePresetToFile(const juce::File& f
 
 bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File& file,juce::String& error) {
     if(!file.existsAsFile()){error="Preset file does not exist.";return false;}
-    if(file.hasFileExtension("json")) {
-        const auto parsed=juce::JSON::parse(file.loadFileAsString());
-        auto* root=parsed.getDynamicObject();
-        if(root==nullptr){error="Invalid JSON preset.";return false;}
-        const auto values=root->getProperty("parameters");
-        auto* object=values.getDynamicObject();
-        if(object==nullptr){error="Preset has no parameters object.";return false;}
-        const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width",
-          "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
-          "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
-        for(const auto* id:ids) {
-            const auto value=object->getProperty(id);
-            if(!value.isVoid()) {
-                if(auto* parameter=dynamic_cast<juce::RangedAudioParameter*>(parameters.getParameter(id)))
-                    parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(value)));
-            }
-        }
-        error.clear();
-        return true;
-    }
+    if(file.hasFileExtension("json")) return applyJsonPreset(parameters,file.loadFileAsString(),error);
     auto xml=juce::XmlDocument::parse(file.loadFileAsString());
     if(xml==nullptr||!xml->hasTagName(parameters.state.getType())){error="Invalid CRAY LDR preset file.";return false;}
     auto state=juce::ValueTree::fromXml(*xml);
@@ -122,6 +126,13 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File&
     parameters.replaceState(state);
     error.clear();
     return true;
+}
+
+bool CRAYLDRUrbanInstrumentsAudioProcessor::loadFactoryPreset(int index,juce::String& error) {
+    if(index==1) return applyJsonPreset(parameters,juce::String::fromUTF8(BinaryData::Init_Sub_Sine_json,BinaryData::Init_Sub_Sine_jsonSize),error);
+    if(index==2) return applyJsonPreset(parameters,juce::String::fromUTF8(BinaryData::Init_Urban_Saw_json,BinaryData::Init_Urban_Saw_jsonSize),error);
+    error="Unknown factory preset.";
+    return false;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter(){return new CRAYLDRUrbanInstrumentsAudioProcessor();}
