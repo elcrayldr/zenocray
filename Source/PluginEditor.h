@@ -18,6 +18,9 @@ private:
  std::array<Slider,13> globalControls;
  std::array<juce::Label,13> globalLabels;
  std::array<Slider,2> lfoControls;
+ Slider sampleStartSlider,sampleEndSlider;
+ juce::Label sampleStartLabel,sampleEndLabel;
+ juce::ToggleButton sampleLoopToggle;
  std::array<juce::Label,2> lfoLabels;
  juce::ComboBox lfoDestinationSelector;
  std::array<std::array<Slider,3>,4> oscillatorControls;
@@ -25,5 +28,6 @@ private:
  std::array<juce::ComboBox,4> oscillatorWaveforms;
  std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> sliderAttachments;
  std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>> comboAttachments;
+ std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment>> buttonAttachments;
  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessorEditor)
 };
