@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 project(CRAY_LDR_URBAN_INSTRUMENTS VERSION 0.1.0 LANGUAGES CXX)
 
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(cray_core_tests Tests/CoreTests.cpp)
+  add_test(NAME cray_core_math COMMAND cray_core_tests)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
