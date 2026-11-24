@@ -79,20 +79,23 @@ void SamplerEngine::noteOn(int note,float velocity) noexcept {
  Voice* target=nullptr;
  for(auto& v:voices)if(!v.active){target=&v;break;}
  if(target==nullptr)target=&voices[0];
- target->sample=sample;target->position=0.0;target->note=note;
+ const double start=static_cast<double>(trimStart.load(std::memory_order_relaxed))*static_cast<double>(sample->audio.getNumSamples()-1);
+ const double end=static_cast<double>(trimEnd.load(std::memory_order_relaxed))*static_cast<double>(sample->audio.getNumSamples());
+ target->sample=sample;target->startSample=start;target->endSample=juce::jmax(start+1.0,juce::jmin(end,static_cast<double>(sample->audio.getNumSamples())));
+ target->position=start;target->note=note;
  target->increment=(sample->sampleRate/hostSampleRate)*std::pow(2.0,static_cast<double>(note-sample->rootNote)/12.0);
- target->velocity=juce::jlimit(0.0f,1.0f,velocity);target->releaseRemaining=0;target->releaseTotal=0;target->active=true;
+ target->velocity=juce::jlimit(0.0f,1.0f,velocity);target->releaseRemaining=0;target->releaseTotal=0;target->loop=loopEnabled.load(std::memory_order_relaxed);target->active=true;
 }
 
 void SamplerEngine::noteOff(int note) noexcept {
  const int releaseSamples=juce::jmax(1,static_cast<int>(hostSampleRate*0.035));
- for(auto& v:voices)if(v.active&&v.note==note){v.releaseRemaining=releaseSamples;v.releaseTotal=releaseSamples;}
+ for(auto& v:voices)if(v.active&&v.note==note){v.releaseRemaining=releaseSamples;v.releaseTotal=releaseSamples;v.loop=false;}
 }
 
 void SamplerEngine::handleMidi(const juce::MidiMessage& m) noexcept {
  if(m.isNoteOn())noteOn(m.getNoteNumber(),m.getFloatVelocity());
  else if(m.isNoteOff())noteOff(m.getNoteNumber());
- else if(m.isAllNotesOff()||m.isAllSoundOff())for(auto& v:voices)if(v.active){v.releaseRemaining=juce::jmax(1,static_cast<int>(hostSampleRate*0.01));v.releaseTotal=v.releaseRemaining;}
+ else if(m.isAllNotesOff()||m.isAllSoundOff())for(auto& v:voices)if(v.active){v.releaseRemaining=juce::jmax(1,static_cast<int>(hostSampleRate*0.01));v.releaseTotal=v.releaseRemaining;v.loop=false;}
 }
 
 void SamplerEngine::render(juce::AudioBuffer<float>& out,int start,int count) noexcept {
@@ -106,9 +109,13 @@ void SamplerEngine::render(juce::AudioBuffer<float>& out,int start,int count) no
   const auto& src=v.sample->audio;const int length=src.getNumSamples();const int srcChannels=src.getNumChannels();
   const float* sl=src.getReadPointer(0);const float* sr=srcChannels>1?src.getReadPointer(1):sl;
   for(int i=0;i<count;++i){
-   const int index=static_cast<int>(v.position);
-   if(index>=length){v.active=false;break;}
-   const int next=juce::jmin(index+1,length-1);const float frac=static_cast<float>(v.position-index);
+   if(v.position>=v.endSample){
+    if(v.loop&&v.releaseRemaining==0){const double loopLength=v.endSample-v.startSample;if(loopLength>1.0)v.position=v.startSample+std::fmod(v.position-v.startSample,loopLength);else{v.active=false;break;}}
+    else{v.active=false;break;}
+   }
+   const int lastIndex=juce::jlimit(0,length-1,static_cast<int>(std::ceil(v.endSample))-1);
+   const int index=juce::jlimit(0,lastIndex,static_cast<int>(v.position));
+   const int next=juce::jmin(index+1,lastIndex);const float frac=static_cast<float>(v.position-index);
    const float l=sl[index]+(sl[next]-sl[index])*frac;
    const float r=sr[index]+(sr[next]-sr[index])*frac;
    float gain=v.velocity*masterLevel;
