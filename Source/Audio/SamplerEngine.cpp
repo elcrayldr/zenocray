@@ -10,7 +10,9 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  if(reader->lengthInSamples<=0||reader->lengthInSamples>static_cast<juce::int64>(reader->sampleRate*300.0)){
   error="Sample must be between 1 sample and 5 minutes.";return false;
  }
- const int channels=static_cast<int>(juce::jlimit<juce::uint32>(1,2,reader->numChannels));
+ const int channels=static_cast<int>(juce::jlimit<juce::uint32>(1u,2u,reader->numChannels));
+ const auto requiredBytes=static_cast<size_t>(reader->lengthInSamples)*static_cast<size_t>(channels)*sizeof(float);
+ if(requiredBytes>static_cast<size_t>(512)*1024*1024-ownedSampleBytes){error="Sample memory limit reached (512 MB per plugin instance). Close and reopen the plugin to release replaced samples.";return false;}
  auto data=std::make_unique<SampleData>();
  data->audio.setSize(channels,static_cast<int>(reader->lengthInSamples));
  data->sampleRate=reader->sampleRate;
@@ -27,6 +29,7 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  }
  auto* raw=data.get();
  ownedSamples.push_back(std::move(data));
+ ownedSampleBytes+=requiredBytes;
  activeSample.store(raw,std::memory_order_release);
  loadedName=file.getFileName();
  error.clear();
@@ -42,7 +45,7 @@ void SamplerEngine::noteOn(int note,float velocity) noexcept {
  for(auto& v:voices)if(!v.active){target=&v;break;}
  if(target==nullptr)target=&voices[0];
  target->sample=sample;target->position=0.0;target->note=note;
- target->increment=(sample->sampleRate/hostSampleRate)*std::pow(2.0,static_cast<double>(note-sample->rootNote)/12.0);
+ target->increment=(sample->sampleRate/hostSampleRate)*std::pow(2.0,static_cast<double>(note-rootNote.load(std::memory_order_relaxed))/12.0);
  target->velocity=juce::jlimit(0.0f,1.0f,velocity);target->releaseRemaining=0;target->releaseTotal=0;target->active=true;
 }
 
@@ -59,6 +62,7 @@ void SamplerEngine::handleMidi(const juce::MidiMessage& m) noexcept {
 
 void SamplerEngine::render(juce::AudioBuffer<float>& out,int start,int count) noexcept {
  const int outChannels=out.getNumChannels();
+ const float masterLevel=outputLevel.load(std::memory_order_relaxed);
  if(outChannels==0)return;
  auto* left=out.getWritePointer(0,start);
  auto* right=outChannels>1?out.getWritePointer(1,start):nullptr;
@@ -72,7 +76,7 @@ void SamplerEngine::render(juce::AudioBuffer<float>& out,int start,int count) no
    const int next=juce::jmin(index+1,length-1);const float frac=static_cast<float>(v.position-index);
    const float l=sl[index]+(sl[next]-sl[index])*frac;
    const float r=sr[index]+(sr[next]-sr[index])*frac;
-   float gain=v.velocity;
+   float gain=v.velocity*masterLevel;
    if(v.releaseRemaining>0){gain*=static_cast<float>(v.releaseRemaining)/static_cast<float>(v.releaseTotal);--v.releaseRemaining;if(v.releaseRemaining==0)v.active=false;}
    left[i]+=l*gain;if(right)right[i]+=r*gain;
    v.position+=v.increment;
