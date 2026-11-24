@@ -41,6 +41,23 @@ private:
     cray::BasicEffects effects;
     cray::SamplerEngine sampler;
     juce::ThreadPool sampleLoader{1};
+    struct CachedParameters {
+        std::atomic<float>* attack=nullptr;
+        std::atomic<float>* decay=nullptr;
+        std::atomic<float>* sustain=nullptr;
+        std::atomic<float>* release=nullptr;
+        std::atomic<float>* cutoff=nullptr;
+        std::atomic<float>* resonance=nullptr;
+        std::atomic<float>* masterLevel=nullptr;
+        std::atomic<float>* drive=nullptr;
+        std::atomic<float>* width=nullptr;
+        std::atomic<float>* samplerLevel=nullptr;
+        std::atomic<float>* sampleRoot=nullptr;
+        std::array<std::atomic<float>*,4> oscillatorLevel{};
+        std::array<std::atomic<float>*,4> oscillatorSemitone{};
+        std::array<std::atomic<float>*,4> oscillatorFine{};
+        std::array<std::atomic<float>*,4> oscillatorWave{};
+    } cached;
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessor)
 };
