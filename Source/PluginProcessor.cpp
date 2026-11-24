@@ -13,6 +13,8 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     p.add(std::make_unique<AudioParameterFloat>("level","Master Level",0.0f,1.0f,0.2f));
     p.add(std::make_unique<AudioParameterFloat>("drive","Drive",0.0f,1.0f,0.0f));
     p.add(std::make_unique<AudioParameterFloat>("width","Stereo Width",0.0f,2.0f,1.0f));
+    p.add(std::make_unique<AudioParameterFloat>("samplerLevel","Sampler Level",0.0f,1.0f,0.8f));
+    p.add(std::make_unique<AudioParameterFloat>("sampleRoot", "Sample Root Note", NormalisableRange<float>(0.0f,127.0f,1.0f),60.0f));
     for (int i=1;i<=4;++i) {
         const auto suffix=String(i);
         p.add(std::make_unique<AudioParameterFloat>("osc"+suffix+"Level","OSC "+suffix+" Level",0.0f,1.0f,i==1?0.75f:0.0f));
@@ -58,6 +60,8 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     }
     b.clear();
     synth.renderNextBlock(b,m,0,b.getNumSamples());
+    sampler.setLevel(get("samplerLevel"));
+    sampler.setRootNote(static_cast<int>(get("sampleRoot")));
     sampler.processBlock(b,m);
     effects.setDrive(get("drive"));
     effects.setWidth(get("width"));
@@ -100,7 +104,7 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File&
         if(object==nullptr){error="Preset has no parameters object.";return false;}
         const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width",
           "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
-          "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave"};
+          "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
         for(const auto* id:ids) {
             const auto value=object->getProperty(id);
             if(!value.isVoid()) {
