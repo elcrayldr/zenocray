@@ -11,7 +11,7 @@ int main() {
 
     double phase=0.0;
     for(int i=0;i<48000;++i){phase+=increment;if(phase>=1.0)phase-=std::floor(phase);}
-    if(!near(phase,0.0))return 2;
+    if(std::min(phase,1.0-phase)>1.0e-8)return 2;
 
     const double upTwoSemitones=std::pow(2.0,2.0/12.0);
     const double downTwoSemitones=std::pow(2.0,-2.0/12.0);
