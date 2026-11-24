@@ -1,14 +1,14 @@
 {
   "format": "cray-urban-preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Init Sub Sine",
   "category": "Basses & 808",
   "parameters": {
-    "master": 0.8, "pan": 0.0, "cutoff": 450.0,
-    "attack": 0.005, "decay": 0.12, "sustain": 0.9, "release": 0.18,
-    "osc1_wave": 0, "osc1_level": 0.8,
-    "osc2_wave": 0, "osc2_level": 0.0,
-    "osc3_wave": 0, "osc3_level": 0.0,
-    "osc4_wave": 0, "osc4_level": 0.0
+    "level": 0.8, "cutoff": 450.0, "resonance": 0.15,
+    "attack": 5.0, "decay": 120.0, "sustain": 0.9, "release": 180.0,
+    "osc1Wave": 0, "osc1Level": 0.8, "osc1Semi": 0.0, "osc1Fine": 0.0,
+    "osc2Wave": 0, "osc2Level": 0.0, "osc2Semi": 0.0, "osc2Fine": 0.0,
+    "osc3Wave": 0, "osc3Level": 0.0, "osc3Semi": 0.0, "osc3Fine": 0.0,
+    "osc4Wave": 0, "osc4Level": 0.0, "osc4Semi": 0.0, "osc4Fine": 0.0
   }
 }
