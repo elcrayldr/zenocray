@@ -22,6 +22,20 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  subtitle.setFont(juce::Font(11.0f));subtitle.setColour(juce::Label::textColourId,muted);addAndMakeVisible(subtitle);
  loadSampleButton.setColour(juce::TextButton::buttonColourId,yellow);loadSampleButton.setColour(juce::TextButton::textColourOffId,bg);addAndMakeVisible(loadSampleButton);
  sampleStatus.setText(processor.getLoadedSampleName(),juce::dontSendNotification);sampleStatus.setColour(juce::Label::textColourId,muted);sampleStatus.setFont(juce::Font(10.0f));addAndMakeVisible(sampleStatus);
+ savePresetButton.setColour(juce::TextButton::buttonColourId,panel);savePresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(savePresetButton);
+ loadPresetButton.setColour(juce::TextButton::buttonColourId,panel);loadPresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(loadPresetButton);
+ savePresetButton.onClick=[this]{
+  presetChooser=std::make_unique<juce::FileChooser>("Save CRAY LDR preset",processor.getUserPresetDirectory().getChildFile("New Preset.craypreset"),"*.craypreset");
+  presetChooser->launchAsync(juce::FileBrowserComponent::saveMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
+   auto file=chooser.getResult();if(file!=juce::File{}){if(file.getFileExtension().isEmpty())file=juce::File(file.getFullPathName()+".craypreset");juce::String error;if(!processor.savePresetToFile(file,error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("PRESET SAVED: "+file.getFileName(),juce::dontSendNotification);}presetChooser.reset();
+  });
+ };
+ loadPresetButton.onClick=[this]{
+  presetChooser=std::make_unique<juce::FileChooser>("Load CRAY LDR preset",processor.getUserPresetDirectory(),"*.craypreset;*.xml");
+  presetChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
+   const auto file=chooser.getResult();if(file.existsAsFile()){juce::String error;if(!processor.loadPresetFromFile(file,error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("PRESET LOADED: "+file.getFileName(),juce::dontSendNotification);}presetChooser.reset();
+  });
+ };
  loadSampleButton.onClick=[this]{
   sampleChooser=std::make_unique<juce::FileChooser>("Load audio sample",juce::File{},"*.wav;*.aif;*.aiff;*.flac");
   sampleChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
@@ -75,7 +89,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
- title.setBounds(24,18,650,38);subtitle.setBounds(26,58,650,20);loadSampleButton.setBounds(getWidth()-190,26,164,32);sampleStatus.setBounds(getWidth()-430,62,400,20);
+ title.setBounds(24,18,600,38);subtitle.setBounds(26,58,600,20);savePresetButton.setBounds(getWidth()-454,26,130,32);loadPresetButton.setBounds(getWidth()-314,26,130,32);loadSampleButton.setBounds(getWidth()-174,26,150,32);sampleStatus.setBounds(getWidth()-454,62,430,20);
  const int globalX=28,globalY=140,globalW=118,gap=4;
  for(int i=0;i<9;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
  for(int o=0;o<4;++o){
