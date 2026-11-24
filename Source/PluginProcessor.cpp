@@ -35,6 +35,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::prepareToPlay(double sr,int block) {
     for(int i=0;i<synth.getNumVoices();++i)
         if(auto* v=dynamic_cast<cray::SynthVoice*>(synth.getVoice(i))) v->prepare(sr);
     effects.prepare(sr,block,getTotalNumOutputChannels());
+    sampler.prepare(sr);
 }
 
 bool CRAYLDRUrbanInstrumentsAudioProcessor::isBusesLayoutSupported(const BusesLayout& l) const {
@@ -57,6 +58,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     }
     b.clear();
     synth.renderNextBlock(b,m,0,b.getNumSamples());
+    sampler.processBlock(b,m);
     effects.setDrive(get("drive"));
     effects.setWidth(get("width"));
     effects.process(b);
