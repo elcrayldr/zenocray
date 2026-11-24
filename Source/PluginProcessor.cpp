@@ -73,4 +73,31 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::setStateInformation(const void* data
     std::unique_ptr<XmlElement> xml(getXmlFromBinary(data,size));
     if(xml&&xml->hasTagName(parameters.state.getType()))parameters.replaceState(juce::ValueTree::fromXml(*xml));
 }
+juce::File CRAYLDRUrbanInstrumentsAudioProcessor::getUserPresetDirectory() const {
+    auto dir=juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                 .getChildFile("CRAY LDR").getChildFile("Urban Instruments").getChildFile("Presets");
+    dir.createDirectory();
+    return dir;
+}
+
+bool CRAYLDRUrbanInstrumentsAudioProcessor::savePresetToFile(const juce::File& file,juce::String& error) {
+    auto state=parameters.copyState();
+    state.setProperty("schemaVersion",2,nullptr);
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
+    if(xml==nullptr||!xml->writeTo(file)){error="Could not write preset file.";return false;}
+    error.clear();
+    return true;
+}
+
+bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File& file,juce::String& error) {
+    if(!file.existsAsFile()){error="Preset file does not exist.";return false;}
+    auto xml=juce::XmlDocument::parse(file.loadFileAsString());
+    if(xml==nullptr||!xml->hasTagName(parameters.state.getType())){error="Invalid CRAY LDR preset file.";return false;}
+    auto state=juce::ValueTree::fromXml(*xml);
+    if(!state.isValid()){error="Preset state is invalid.";return false;}
+    parameters.replaceState(state);
+    error.clear();
+    return true;
+}
+
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter(){return new CRAYLDRUrbanInstrumentsAudioProcessor();}
