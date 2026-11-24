@@ -14,13 +14,15 @@ public:
  void prepare(double sampleRate) noexcept;
  void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
  void setRootNote(int note) noexcept { rootNote.store(juce::jlimit(0,127,note),std::memory_order_relaxed); }
+ void setTrim(float start,float end) noexcept { trimStart.store(juce::jlimit(0.0f,0.99f,start),std::memory_order_relaxed);trimEnd.store(juce::jlimit(0.01f,1.0f,end),std::memory_order_relaxed); }
+ void setLoop(bool enabled) noexcept { loopEnabled.store(enabled,std::memory_order_relaxed); }
  void processBlock(juce::AudioBuffer<float>& output,const juce::MidiBuffer& midi) noexcept;
  juce::String getLoadedSampleName() const;
  std::array<float,256> getPreviewData() const;
  bool hasSample() const noexcept { return activeSample.load(std::memory_order_acquire)!=nullptr; }
 private:
  struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name; };
- struct Voice { const SampleData* sample=nullptr; double position=0.0,increment=1.0; float velocity=0.0f; int note=-1,releaseRemaining=0,releaseTotal=0; bool active=false; };
+ struct Voice { const SampleData* sample=nullptr; double position=0.0,increment=1.0,startSample=0.0,endSample=0.0; float velocity=0.0f; int note=-1,releaseRemaining=0,releaseTotal=0; bool loop=false,active=false; };
  static constexpr int maxVoices=32;
  static constexpr int maxZones=16;
  std::array<Voice,maxVoices> voices{};
@@ -34,6 +36,8 @@ private:
  juce::CriticalSection zoneLock;
  std::atomic<float> outputLevel{0.8f};
  std::atomic<int> rootNote{60};
+ std::atomic<float> trimStart{0.0f},trimEnd{1.0f};
+ std::atomic<bool> loopEnabled{false};
  size_t ownedSampleBytes=0;
  double hostSampleRate=44100.0;
  juce::String loadedName{"NO SAMPLE LOADED"};
