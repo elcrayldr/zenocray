@@ -30,6 +30,8 @@ private:
  std::atomic<SampleData*> activeSample{nullptr};
  std::array<std::atomic<SampleData*>,maxZones> sampleZones{};
  std::atomic<int> sampleZoneCount{0};
+ std::atomic<unsigned int> zoneGeneration{0};
+ juce::CriticalSection zoneLock;
  std::atomic<float> outputLevel{0.8f};
  std::atomic<int> rootNote{60};
  size_t ownedSampleBytes=0;
