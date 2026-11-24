@@ -23,6 +23,7 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,int rootNoteForSam
  data->sampleRate=reader->sampleRate;
  data->rootNote=juce::jlimit(0,127,rootNoteForSample);
  data->name=file.getFileName();
+ data->filePath=file.getFullPathName();
  if(!reader->read(&data->audio,0,static_cast<int>(reader->lengthInSamples),0,true,channels>1)){
   error="Could not decode audio file.";return false;
  }
@@ -49,6 +50,18 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,int rootNoteForSam
  }
  error.clear();
  return true;
+}
+
+std::vector<SamplerEngine::ZoneInfo> SamplerEngine::getZoneInfos() const {
+ std::vector<ZoneInfo> result;
+ const juce::ScopedLock zoneGuard(zoneLock);
+ const int count=sampleZoneCount.load(std::memory_order_acquire);
+ result.reserve(static_cast<size_t>(count));
+ for(int i=0;i<count;++i){
+  auto* sample=sampleZones[static_cast<size_t>(i)].load(std::memory_order_acquire);
+  if(sample!=nullptr)result.push_back({sample->filePath,sample->rootNote});
+ }
+ return result;
 }
 
 void SamplerEngine::clearZones() noexcept {
