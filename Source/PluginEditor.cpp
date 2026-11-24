@@ -57,7 +57,7 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  };
 
  const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","samplerLevel","sampleRoot"};
- const char* names[]={"ATTACK","DECAY","SUSTAIN","RELEASE","FILTER CUTOFF","RESONANCE","MASTER","DRIVE","STEREO WIDTH","SAMPLE LEVEL","ROOT NOTE"};
+ const char* names[]={"ATTACK","DECAY","SUSTAIN","RELEASE","FILTER CUTOFF","RESONANCE","MASTER","DRIVE","STEREO WIDTH","SAMPLE LEVEL","NEXT ROOT"};
  for(int i=0;i<11;++i){
   globalLabels[i].setText(names[i],juce::dontSendNotification);globalLabels[i].setJustificationType(juce::Justification::centred);
   globalLabels[i].setColour(juce::Label::textColourId,muted);addAndMakeVisible(globalLabels[i]);
