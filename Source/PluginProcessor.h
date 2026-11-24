@@ -32,6 +32,7 @@ public:
     const std::array<float,256>& getSamplePreview() const noexcept { return sampler.getPreviewData(); }
     bool savePresetToFile(const juce::File& file, juce::String& error);
     bool loadPresetFromFile(const juce::File& file, juce::String& error);
+    bool loadFactoryPreset(int index, juce::String& error);
     juce::File getUserPresetDirectory() const;
 private:
     juce::Synthesiser synth;
