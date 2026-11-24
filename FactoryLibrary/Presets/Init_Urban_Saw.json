@@ -4,7 +4,7 @@
   "name": "Init Urban Saw",
   "category": "Leads",
   "parameters": {
-    "level": 0.72, "cutoff": 18000.0, "resonance": 0.18, "drive": 0.0, "width": 1.0, "chorusMix": 0.12, "reverbMix": 0.18, "samplerLevel": 0.8, "sampleRoot": 60, "lfoRate": 0.5, "lfoDepth": 0.0, "lfoDestination": 0,
+    "level": 0.72, "cutoff": 18000.0, "resonance": 0.18, "drive": 0.0, "width": 1.0, "chorusMix": 0.12, "reverbMix": 0.18, "samplerLevel": 0.8, "sampleRoot": 60, "lfoRate": 0.5, "lfoDepth": 0.0, "lfoDestination": 0, "sampleStart": 0.0, "sampleEnd": 1.0, "sampleLoop": false,
     "attack": 10.0, "decay": 180.0, "sustain": 0.75, "release": 250.0,
     "osc1Wave": 1, "osc1Level": 0.72, "osc1Semi": 0.0, "osc1Fine": 0.0,
     "osc2Wave": 1, "osc2Level": 0.28, "osc2Semi": 0.0, "osc2Fine": -7.0,
