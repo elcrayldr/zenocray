@@ -10,7 +10,7 @@ public:
 private:
  using Slider=juce::Slider;
  CRAYLDRUrbanInstrumentsAudioProcessor& processor;
- juce::Label title,subtitle,sampleStatus;
+ juce::Label title,subtitle,sampleStatus,lfoDestinationLabel;
  juce::TextButton loadSampleButton{"LOAD SAMPLE"},savePresetButton{"SAVE PRESET"},loadPresetButton{"LOAD PRESET"},clearSampleButton{"CLEAR ZONES"};
  juce::ComboBox factoryPresetSelector;
  std::unique_ptr<juce::FileChooser> presetChooser;
