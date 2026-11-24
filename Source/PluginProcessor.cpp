@@ -60,7 +60,7 @@ static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce
 CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
 : AudioProcessor(BusesProperties().withOutput("Output",AudioChannelSet::stereo(),true)),
   parameters(*this,nullptr,"CRAY_STATE",makeParams()) {
-    for(int i=0;i<64;++i) synth.addVoice(new cray::SynthVoice());
+    for(int i=0;i<static_cast<int>(synthVoices.size());++i){synthVoices[static_cast<size_t>(i)]=new cray::SynthVoice();synth.addVoice(synthVoices[static_cast<size_t>(i)]);}
     synth.addSound(new cray::SynthSound());
 }
 
@@ -82,8 +82,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::prepareToPlay(double sr,int block) {
     synth.setCurrentPlaybackSampleRate(sr);
-    for(int i=0;i<synth.getNumVoices();++i)
-        if(auto* v=dynamic_cast<cray::SynthVoice*>(synth.getVoice(i))) v->prepare(sr);
+    for(auto* voice:synthVoices) if(voice!=nullptr) voice->prepare(sr);
     effects.prepare(sr,block,getTotalNumOutputChannels());
     sampler.prepare(sr);
 }
@@ -96,13 +95,13 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     ScopedNoDenormals noDenormals;
     for(int c=getTotalNumInputChannels();c<getTotalNumOutputChannels();++c) b.clear(c,0,b.getNumSamples());
     const auto get=[this](const juce::String& id){return parameters.getRawParameterValue(id)->load();};
-    for(int i=0;i<synth.getNumVoices();++i) {
-        if(auto* v=dynamic_cast<cray::SynthVoice*>(synth.getVoice(i))) {
-            v->setParameters(get("attack"),get("decay"),get("sustain"),get("release"),get("cutoff"),get("resonance"),get("level"));
+    for(auto* voice:synthVoices) {
+        if(voice!=nullptr) {
+            voice->setParameters(get("attack"),get("decay"),get("sustain"),get("release"),get("cutoff"),get("resonance"),get("level"));
             for(int osc=0;osc<4;++osc) {
                 const auto n=juce::String(osc+1);
-                v->setOscillator(osc,get("osc"+n+"Level"),get("osc"+n+"Semi"),get("osc"+n+"Fine"),
-                                 static_cast<int>(get("osc"+n+"Wave")));
+                voice->setOscillator(osc,get("osc"+n+"Level"),get("osc"+n+"Semi"),get("osc"+n+"Fine"),
+                                     static_cast<int>(get("osc"+n+"Wave")));
             }
         }
     }
