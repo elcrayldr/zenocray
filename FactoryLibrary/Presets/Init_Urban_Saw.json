@@ -1,14 +1,14 @@
 {
   "format": "cray-urban-preset",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "Init Urban Saw",
   "category": "Leads",
   "parameters": {
-    "master": 0.8, "pan": 0.0, "cutoff": 18000.0,
-    "attack": 0.01, "decay": 0.18, "sustain": 0.75, "release": 0.25,
-    "osc1_wave": 1, "osc1_level": 0.8,
-    "osc2_wave": 0, "osc2_level": 0.0,
-    "osc3_wave": 0, "osc3_level": 0.0,
-    "osc4_wave": 0, "osc4_level": 0.0
+    "level": 0.72, "cutoff": 18000.0, "resonance": 0.18,
+    "attack": 10.0, "decay": 180.0, "sustain": 0.75, "release": 250.0,
+    "osc1Wave": 1, "osc1Level": 0.72, "osc1Semi": 0.0, "osc1Fine": 0.0,
+    "osc2Wave": 1, "osc2Level": 0.28, "osc2Semi": 0.0, "osc2Fine": -7.0,
+    "osc3Wave": 0, "osc3Level": 0.0, "osc3Semi": 12.0, "osc3Fine": 0.0,
+    "osc4Wave": 0, "osc4Level": 0.0, "osc4Semi": -12.0, "osc4Fine": 0.0
   }
 }
