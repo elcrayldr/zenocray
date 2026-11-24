@@ -12,7 +12,7 @@
 | Sample root mapping | Basic implementation | Root note is selected before import; nearest root zone plays |
 | Factory presets | Embedded selector implemented | Init Sub Sine and Init Urban Saw |
 | User preset save/load | Implemented | Versioned APVTS XML .craypreset files; external JSON import supported |
-| Stereo width / drive | Basic implementation | Zero drive preserves unity; no advanced FX rack yet |
+| Drive / stereo width / chorus / reverb | Basic FX rack implemented | Host-automatable wet controls; delay and advanced routing still pending |
 | Velocity layers / round-robin / zone range editor | Not implemented | Planned |
 | Sample trim and loop points | Not implemented | Planned |
 | Modulation matrix / LFOs / effects rack | Not implemented | Planned |
