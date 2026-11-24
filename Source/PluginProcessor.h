@@ -1,5 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
+#include <atomic>
 #include "Audio/SynthVoice.h"
 #include "Audio/Effects/BasicEffects.h"
 #include "Audio/SamplerEngine.h"
