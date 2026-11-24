@@ -126,8 +126,9 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  const auto& preview=processor.getSamplePreview();
  const float center=915.0f, halfHeight=34.0f, x0=330.0f, usableWidth=static_cast<float>(getWidth())-366.0f;
  g.setColour(juce::Colour(0xff343840));g.drawLine(x0,center,x0+usableWidth,center,1.0f);
- g.setColour(yellow);
- for(size_t i=0;i<preview.size();++i){const float x=x0+usableWidth*static_cast<float>(i)/static_cast<float>(preview.size()-1);const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.drawLine(x,center-h,x,center+h,1.2f);}
+ const float trimStart=processor.parameters.getRawParameterValue("sampleStart")->load();
+ const float trimEnd=processor.parameters.getRawParameterValue("sampleEnd")->load();
+ for(size_t i=0;i<preview.size();++i){const float position=static_cast<float>(i)/static_cast<float>(preview.size()-1);const float x=x0+usableWidth*position;const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.setColour(position>=trimStart&&position<=trimEnd?yellow:juce::Colour(0xff555963));g.drawLine(x,center-h,x,center+h,1.2f);}
  for(int i=0;i<4;++i){
   const int x=34+i*267;
   g.setColour(juce::Colour(0xff292c32));g.fillRoundedRectangle((float)x,354.0f,250.0f,320.0f,8.0f);
