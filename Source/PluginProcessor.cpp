@@ -23,6 +23,8 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     p.add(std::make_unique<AudioParameterFloat>("level","Master Level",0.0f,1.0f,0.2f));
     p.add(std::make_unique<AudioParameterFloat>("drive","Drive",0.0f,1.0f,0.0f));
     p.add(std::make_unique<AudioParameterFloat>("width","Stereo Width",0.0f,2.0f,1.0f));
+    p.add(std::make_unique<AudioParameterFloat>("chorusMix","Chorus",0.0f,1.0f,0.0f));
+    p.add(std::make_unique<AudioParameterFloat>("reverbMix","Reverb",0.0f,1.0f,0.0f));
     p.add(std::make_unique<AudioParameterFloat>("samplerLevel","Sampler Level",0.0f,1.0f,0.8f));
     p.add(std::make_unique<AudioParameterFloat>("sampleRoot", "Sample Root Note", NormalisableRange<float>(0.0f,127.0f,1.0f),60.0f));
     for (int i=1;i<=4;++i) {
@@ -43,7 +45,7 @@ static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce
     const auto values=root->getProperty("parameters");
     auto* object=values.getDynamicObject();
     if(object==nullptr){error="Preset has no parameters object.";return false;}
-    const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width",
+    const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","chorusMix","reverbMix",
       "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
       "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
     for(const auto* id:ids) {
@@ -71,6 +73,8 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
     cached.masterLevel=parameters.getRawParameterValue("level");
     cached.drive=parameters.getRawParameterValue("drive");
     cached.width=parameters.getRawParameterValue("width");
+    cached.chorusMix=parameters.getRawParameterValue("chorusMix");
+    cached.reverbMix=parameters.getRawParameterValue("reverbMix");
     cached.samplerLevel=parameters.getRawParameterValue("samplerLevel");
     cached.sampleRoot=parameters.getRawParameterValue("sampleRoot");
     for(int osc=0;osc<4;++osc){
@@ -131,6 +135,8 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     sampler.processBlock(b,m);
     effects.setDrive(load(cached.drive));
     effects.setWidth(load(cached.width));
+    effects.setChorusMix(load(cached.chorusMix));
+    effects.setReverbMix(load(cached.reverbMix));
     effects.process(b);
 }
 
