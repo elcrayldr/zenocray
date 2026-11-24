@@ -1,19 +1,22 @@
 #pragma once
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+
 class CRAYLDRUrbanInstrumentsAudioProcessorEditor final : public juce::AudioProcessorEditor {
 public:
-    explicit CRAYLDRUrbanInstrumentsAudioProcessorEditor(CRAYLDRUrbanInstrumentsAudioProcessor&);
-    void paint(juce::Graphics&) override;
-    void resized() override;
+ explicit CRAYLDRUrbanInstrumentsAudioProcessorEditor(CRAYLDRUrbanInstrumentsAudioProcessor&);
+ void paint(juce::Graphics&) override;
+ void resized() override;
 private:
-    using Slider=juce::Slider;
-    CRAYLDRUrbanInstrumentsAudioProcessor& processor;
-    juce::Label title;
-    std::array<Slider,8> controls;
-    std::array<juce::Label,8> labels;
-    juce::ComboBox waveform;
-    juce::Slider drive,width;
-    std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> attachments;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessorEditor)
+ using Slider=juce::Slider;
+ CRAYLDRUrbanInstrumentsAudioProcessor& processor;
+ juce::Label title,subtitle;
+ std::array<Slider,9> globalControls;
+ std::array<juce::Label,9> globalLabels;
+ std::array<std::array<Slider,3>,4> oscillatorControls;
+ std::array<std::array<juce::Label,3>,4> oscillatorLabels;
+ std::array<juce::ComboBox,4> oscillatorWaveforms;
+ std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>> sliderAttachments;
+ std::vector<std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment>> comboAttachments;
+ JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessorEditor)
 };
