@@ -20,21 +20,25 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  if(!reader->read(&data->audio,0,static_cast<int>(reader->lengthInSamples),0,true,channels>1)){
   error="Could not decode audio file.";return false;
  }
- for(int bin=0;bin<static_cast<int>(previewData.size());++bin){
-  const int begin=bin*data->audio.getNumSamples()/static_cast<int>(previewData.size());
-  const int end=juce::jmax(begin+1,(bin+1)*data->audio.getNumSamples()/static_cast<int>(previewData.size()));
+ std::array<float,256> newPreview{};
+ for(int bin=0;bin<static_cast<int>(newPreview.size());++bin){
+  const int begin=bin*data->audio.getNumSamples()/static_cast<int>(newPreview.size());
+  const int end=juce::jmax(begin+1,(bin+1)*data->audio.getNumSamples()/static_cast<int>(newPreview.size()));
   float peak=0.0f;
   for(int ch=0;ch<data->audio.getNumChannels();++ch){const auto* samples=data->audio.getReadPointer(ch);for(int i=begin;i<juce::jmin(end,data->audio.getNumSamples());++i)peak=juce::jmax(peak,std::abs(samples[i]));}
-  previewData[static_cast<size_t>(bin)]=peak;
+  newPreview[static_cast<size_t>(bin)]=peak;
  }
  auto* raw=data.get();
  ownedSamples.push_back(std::move(data));
  ownedSampleBytes+=requiredBytes;
  activeSample.store(raw,std::memory_order_release);
- loadedName=file.getFileName();
+ {const juce::ScopedLock lock(previewLock);previewData=newPreview;loadedName=file.getFileName();}
  error.clear();
  return true;
 }
+
+juce::String SamplerEngine::getLoadedSampleName() const {const juce::ScopedLock lock(previewLock);return loadedName;}
+std::array<float,256> SamplerEngine::getPreviewData() const {const juce::ScopedLock lock(previewLock);return previewData;}
 
 void SamplerEngine::prepare(double sampleRate) noexcept {hostSampleRate=sampleRate>0.0?sampleRate:44100.0;}
 
