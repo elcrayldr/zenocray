@@ -18,6 +18,12 @@ FetchContent_Declare(JUCE
   GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(JUCE)
 
+juce_add_binary_data(CRAY_LDR_FACTORY_PRESETS
+  SOURCES
+    FactoryLibrary/Presets/Init_Sub_Sine.json
+    FactoryLibrary/Presets/Init_Urban_Saw.json
+)
+
 juce_add_plugin(CRAY_LDR_URBAN_INSTRUMENTS
   COMPANY_NAME "CRAY LDR"
   BUNDLE_ID "com.crayldr.urbaninstruments"
@@ -52,6 +58,7 @@ target_sources(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
 target_compile_definitions(CRAY_LDR_URBAN_INSTRUMENTS PUBLIC
   JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
+  CRAY_LDR_FACTORY_PRESETS
   juce::juce_audio_utils juce::juce_audio_formats juce::juce_dsp juce::juce_gui_extra
   PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags
   juce::juce_recommended_warning_flags)
