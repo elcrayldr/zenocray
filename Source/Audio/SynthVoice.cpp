@@ -25,7 +25,7 @@ float SynthVoice::polyBlep(float p,float dt) noexcept{
  return 0.0f;
 }
 float SynthVoice::renderOscillator(int index,float pitchRatioForSample) noexcept{
- const float p=static_cast<float>(phases[index]);const float dt=static_cast<float>(baseIncrements[index]*pitchRatioForSample);float x=0.0f;
+ const float p=static_cast<float>(phases[index]);const double effectiveIncrement=juce::jmin(baseIncrements[index]*static_cast<double>(pitchRatioForSample),0.45);const float dt=static_cast<float>(effectiveIncrement);float x=0.0f;
  switch(oscillatorWaveforms[index]){
  case 0:x=std::sin(juce::MathConstants<float>::twoPi*p);break;
  case 1:x=2.0f*p-1.0f-polyBlep(p,dt);break;
@@ -33,7 +33,7 @@ float SynthVoice::renderOscillator(int index,float pitchRatioForSample) noexcept
  case 3:x=1.0f-4.0f*std::abs(p-0.5f);break;
  default:x=random.nextFloat()*2.0f-1.0f;break;
  }
- phases[index]+=baseIncrements[index]*pitchRatioForSample;phases[index]-=std::floor(phases[index]);return x;
+ phases[index]+=effectiveIncrement;phases[index]-=std::floor(phases[index]);return x;
 }
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& out,int start,int count){
  if(!isVoiceActive()||out.getNumChannels()==0)return;
