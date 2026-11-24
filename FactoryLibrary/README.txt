@@ -1,1 +1,1 @@
-Factory presets are starter data examples. Preset import/browser integration is not implemented in this milestone.
+Factory preset resources are embedded into the plugin binary and selectable from the FACTORY PRESETS menu. Current presets: Init Sub Sine and Init Urban Saw. JSON resources map parameter IDs and include oscillator, envelope, filter, LFO, FX and sampler defaults.
