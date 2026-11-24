@@ -45,9 +45,9 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
   });
  };
 
- const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width"};
- const char* names[]={"ATTACK","DECAY","SUSTAIN","RELEASE","FILTER CUTOFF","RESONANCE","MASTER","DRIVE","STEREO WIDTH"};
- for(int i=0;i<9;++i){
+ const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","samplerLevel","sampleRoot"};
+ const char* names[]={"ATTACK","DECAY","SUSTAIN","RELEASE","FILTER CUTOFF","RESONANCE","MASTER","DRIVE","STEREO WIDTH","SAMPLE LEVEL","ROOT NOTE"};
+ for(int i=0;i<11;++i){
   globalLabels[i].setText(names[i],juce::dontSendNotification);globalLabels[i].setJustificationType(juce::Justification::centred);
   globalLabels[i].setColour(juce::Label::textColourId,muted);addAndMakeVisible(globalLabels[i]);
   styleRotary(globalControls[i]);addAndMakeVisible(globalControls[i]);
@@ -97,8 +97,8 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
  title.setBounds(24,18,600,38);subtitle.setBounds(26,58,600,20);savePresetButton.setBounds(getWidth()-454,26,130,32);loadPresetButton.setBounds(getWidth()-314,26,130,32);loadSampleButton.setBounds(getWidth()-174,26,150,32);sampleStatus.setBounds(getWidth()-454,62,430,20);
- const int globalX=28,globalY=140,globalW=118,gap=4;
- for(int i=0;i<9;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
+ const int globalX=34,globalY=140,globalW=92,gap=4;
+ for(int i=0;i<11;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
  for(int o=0;o<4;++o){
   const int x=42+o*267;
   for(int c=0;c<3;++c){const int cx=x+c*78;oscillatorLabels[o][c].setBounds(cx,414,74,18);oscillatorControls[o][c].setBounds(cx,432,74,112);}
