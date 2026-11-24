@@ -29,7 +29,7 @@ public:
     juce::AudioProcessorValueTreeState parameters;
     void loadSampleFromFileAsync(const juce::File& file, std::function<void(bool, juce::String)> completion);
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
-    const std::array<float,256>& getSamplePreview() const noexcept { return sampler.getPreviewData(); }
+    std::array<float,256> getSamplePreview() const { return sampler.getPreviewData(); }
     bool savePresetToFile(const juce::File& file, juce::String& error);
     bool loadPresetFromFile(const juce::File& file, juce::String& error);
     bool loadFactoryPreset(int index, juce::String& error);
