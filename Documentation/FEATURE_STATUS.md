@@ -15,7 +15,7 @@
 | Drive / stereo width / chorus / reverb | Basic FX rack implemented | Host-automatable wet controls; delay and advanced routing still pending |
 | Velocity layers / round-robin / zone range editor | Not implemented | Planned |
 | Sample trim and loop points | Not implemented | Planned |
-| Modulation matrix / LFOs / effects rack | Not implemented | Planned |
+| Per-voice LFO | Basic implementation | Sine LFO to pitch, filter cutoff or amplitude; no multi-source modulation matrix yet |
 | FL Studio 26 / Cubase 13 validation | Pending | CI compilation is not DAW validation |
 | Realtime stress / long-session testing | Pending | Must be completed before release |
 
