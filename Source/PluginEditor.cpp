@@ -31,7 +31,7 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
   });
  };
  loadPresetButton.onClick=[this]{
-  presetChooser=std::make_unique<juce::FileChooser>("Load CRAY LDR preset",processor.getUserPresetDirectory(),"*.craypreset;*.xml");
+  presetChooser=std::make_unique<juce::FileChooser>("Load CRAY LDR preset",processor.getUserPresetDirectory(),"*.craypreset;*.xml;*.json");
   presetChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
    const auto file=chooser.getResult();if(file.existsAsFile()){juce::String error;if(!processor.loadPresetFromFile(file,error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("PRESET LOADED: "+file.getFileName(),juce::dontSendNotification);}presetChooser.reset();
   });
