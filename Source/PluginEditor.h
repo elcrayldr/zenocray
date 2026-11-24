@@ -12,6 +12,7 @@ private:
  CRAYLDRUrbanInstrumentsAudioProcessor& processor;
  juce::Label title,subtitle,sampleStatus;
  juce::TextButton loadSampleButton{"LOAD SAMPLE"},savePresetButton{"SAVE PRESET"},loadPresetButton{"LOAD PRESET"};
+ juce::ComboBox factoryPresetSelector;
  std::unique_ptr<juce::FileChooser> presetChooser;
  std::unique_ptr<juce::FileChooser> sampleChooser;
  std::array<Slider,11> globalControls;
