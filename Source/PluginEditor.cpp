@@ -29,6 +29,8 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
 
  savePresetButton.setColour(juce::TextButton::buttonColourId,panel);savePresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(savePresetButton);
  loadPresetButton.setColour(juce::TextButton::buttonColourId,panel);loadPresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(loadPresetButton);
+ clearSampleButton.setColour(juce::TextButton::buttonColourId,panel);clearSampleButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(clearSampleButton);
+ clearSampleButton.onClick=[this]{processor.clearSampleZones();sampleStatus.setText("ZONES CLEARED — MEMORY RELEASES WHEN PLUGIN CLOSES",juce::dontSendNotification);repaint();};
  savePresetButton.onClick=[this]{
   presetChooser=std::make_unique<juce::FileChooser>("Save CRAY LDR preset",processor.getUserPresetDirectory().getChildFile("New Preset.craypreset"),"*.craypreset");
   presetChooser->launchAsync(juce::FileBrowserComponent::saveMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
@@ -108,7 +110,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
  factoryPresetSelector.setBounds(34,744,205,30);
- title.setBounds(24,18,600,38);subtitle.setBounds(26,58,600,20);savePresetButton.setBounds(getWidth()-454,26,130,32);loadPresetButton.setBounds(getWidth()-314,26,130,32);loadSampleButton.setBounds(getWidth()-174,26,150,32);sampleStatus.setBounds(getWidth()-454,62,430,20);
+ title.setBounds(24,18,590,38);subtitle.setBounds(26,58,590,20);savePresetButton.setBounds(getWidth()-494,26,112,32);loadPresetButton.setBounds(getWidth()-374,26,112,32);loadSampleButton.setBounds(getWidth()-254,26,132,32);clearSampleButton.setBounds(getWidth()-114,26,90,32);sampleStatus.setBounds(getWidth()-494,62,470,20);
  const int globalX=34,globalY=140,globalW=92,gap=4;
  for(int i=0;i<11;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
  for(int o=0;o<4;++o){
