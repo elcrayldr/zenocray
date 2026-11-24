@@ -4,7 +4,7 @@
   "name": "Init Sub Sine",
   "category": "Basses & 808",
   "parameters": {
-    "level": 0.8, "cutoff": 450.0, "resonance": 0.15,
+    "level": 0.8, "cutoff": 450.0, "resonance": 0.15, "drive": 0.0, "width": 1.0, "chorusMix": 0.0, "reverbMix": 0.0, "samplerLevel": 0.8, "sampleRoot": 60,
     "attack": 5.0, "decay": 120.0, "sustain": 0.9, "release": 180.0,
     "osc1Wave": 0, "osc1Level": 0.8, "osc1Semi": 0.0, "osc1Fine": 0.0,
     "osc2Wave": 0, "osc2Level": 0.0, "osc2Semi": 0.0, "osc2Fine": 0.0,
