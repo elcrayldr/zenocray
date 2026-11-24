@@ -8,6 +8,7 @@
 namespace cray {
 class SamplerEngine {
 public:
+ SamplerEngine();
  bool loadSampleFromFile(const juce::File& file, juce::String& error);
  void prepare(double sampleRate) noexcept;
  void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
@@ -20,11 +21,14 @@ private:
  struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name; };
  struct Voice { const SampleData* sample=nullptr; double position=0.0,increment=1.0; float velocity=0.0f; int note=-1,releaseRemaining=0,releaseTotal=0; bool active=false; };
  static constexpr int maxVoices=32;
+ static constexpr int maxZones=16;
  std::array<Voice,maxVoices> voices{};
  std::array<float,256> previewData{};
  mutable juce::CriticalSection previewLock;
  std::vector<std::unique_ptr<SampleData>> ownedSamples;
  std::atomic<SampleData*> activeSample{nullptr};
+ std::array<std::atomic<SampleData*>,maxZones> sampleZones{};
+ std::atomic<int> sampleZoneCount{0};
  std::atomic<float> outputLevel{0.8f};
  std::atomic<int> rootNote{60};
  size_t ownedSampleBytes=0;
