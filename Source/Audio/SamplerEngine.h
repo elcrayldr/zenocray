@@ -10,6 +10,7 @@ class SamplerEngine {
 public:
  SamplerEngine();
  bool loadSampleFromFile(const juce::File& file, juce::String& error);
+ void clearZones() noexcept;
  void prepare(double sampleRate) noexcept;
  void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
  void setRootNote(int note) noexcept { rootNote.store(juce::jlimit(0,127,note),std::memory_order_relaxed); }
