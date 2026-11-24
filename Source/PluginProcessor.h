@@ -34,6 +34,7 @@ public:
     void restoreSampleZones(const std::vector<cray::SamplerEngine::ZoneInfo>& zones);
     void clearSampleZones() noexcept { sampler.clearZones(); }
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
+    int getSampleZoneCount() const noexcept { return sampler.getZoneCount(); }
     std::array<float,256> getSamplePreview() const { return sampler.getPreviewData(); }
     bool savePresetToFile(const juce::File& file, juce::String& error);
     bool loadPresetFromFile(const juce::File& file, juce::String& error);
