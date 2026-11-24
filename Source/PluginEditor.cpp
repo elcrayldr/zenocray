@@ -33,28 +33,33 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  clearSampleButton.onClick=[this]{processor.clearSampleZones();sampleStatus.setText("ZONES CLEARED — MEMORY RELEASES WHEN PLUGIN CLOSES",juce::dontSendNotification);repaint();};
  savePresetButton.onClick=[this]{
   presetChooser=std::make_unique<juce::FileChooser>("Save CRAY LDR preset",processor.getUserPresetDirectory().getChildFile("New Preset.craypreset"),"*.craypreset");
-  presetChooser->launchAsync(juce::FileBrowserComponent::saveMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
-   auto file=chooser.getResult();if(file!=juce::File{}){if(file.getFileExtension().isEmpty())file=juce::File(file.getFullPathName()+".craypreset");juce::String error;if(!processor.savePresetToFile(file,error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("PRESET SAVED: "+file.getFileName(),juce::dontSendNotification);}presetChooser.reset();
+  juce::Component::SafePointer<CRAYLDRUrbanInstrumentsAudioProcessorEditor> safeThis(this);
+  presetChooser->launchAsync(juce::FileBrowserComponent::saveMode|juce::FileBrowserComponent::canSelectFiles,[safeThis](const juce::FileChooser& chooser){
+   if(safeThis==nullptr)return;
+   auto file=chooser.getResult();if(file!=juce::File{}){if(file.getFileExtension().isEmpty())file=juce::File(file.getFullPathName()+".craypreset");juce::String error;if(!safeThis->processor.savePresetToFile(file,error))safeThis->sampleStatus.setText(error,juce::dontSendNotification);else safeThis->sampleStatus.setText("PRESET SAVED: "+file.getFileName(),juce::dontSendNotification);}safeThis->presetChooser.reset();
   });
  };
  loadPresetButton.onClick=[this]{
   presetChooser=std::make_unique<juce::FileChooser>("Load CRAY LDR preset",processor.getUserPresetDirectory(),"*.craypreset;*.xml;*.json");
-  presetChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
-   const auto file=chooser.getResult();if(file.existsAsFile()){juce::String error;if(!processor.loadPresetFromFile(file,error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("PRESET LOADED: "+file.getFileName(),juce::dontSendNotification);}presetChooser.reset();
+  juce::Component::SafePointer<CRAYLDRUrbanInstrumentsAudioProcessorEditor> safeThis(this);
+  presetChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[safeThis](const juce::FileChooser& chooser){
+   if(safeThis==nullptr)return;
+   const auto file=chooser.getResult();if(file.existsAsFile()){juce::String error;if(!safeThis->processor.loadPresetFromFile(file,error))safeThis->sampleStatus.setText(error,juce::dontSendNotification);else safeThis->sampleStatus.setText("PRESET LOADED: "+file.getFileName(),juce::dontSendNotification);}safeThis->presetChooser.reset();
   });
  };
  loadSampleButton.onClick=[this]{
   sampleChooser=std::make_unique<juce::FileChooser>("Load audio sample",juce::File{},"*.wav;*.aif;*.aiff;*.flac");
-  sampleChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
+  juce::Component::SafePointer<CRAYLDRUrbanInstrumentsAudioProcessorEditor> safeThis(this);
+  sampleChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[safeThis](const juce::FileChooser& chooser){
+   if(safeThis==nullptr)return;
    const auto file=chooser.getResult();
    if(file.existsAsFile()){
-    sampleStatus.setText("LOADING SAMPLE...",juce::dontSendNotification);
-    juce::Component::SafePointer<CRAYLDRUrbanInstrumentsAudioProcessorEditor> safeThis(this);
-    processor.loadSampleFromFileAsync(file,[safeThis,file](bool success,juce::String error){
+    safeThis->sampleStatus.setText("LOADING SAMPLE...",juce::dontSendNotification);
+    safeThis->processor.loadSampleFromFileAsync(file,[safeThis,file](bool success,juce::String error){
      if(safeThis!=nullptr){safeThis->sampleStatus.setText(success?file.getFileName():error,juce::dontSendNotification);safeThis->repaint();}
     });
    }
-   sampleChooser.reset();
+   safeThis->sampleChooser.reset();
   });
  };
 
