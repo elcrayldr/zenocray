@@ -44,6 +44,14 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  return true;
 }
 
+void SamplerEngine::clearZones() noexcept {
+ sampleZoneCount.store(0,std::memory_order_release);
+ activeSample.store(nullptr,std::memory_order_release);
+ const juce::ScopedLock lock(previewLock);
+ previewData.fill(0.0f);
+ loadedName="NO SAMPLE LOADED";
+}
+
 juce::String SamplerEngine::getLoadedSampleName() const {const juce::ScopedLock lock(previewLock);return loadedName;}
 std::array<float,256> SamplerEngine::getPreviewData() const {const juce::ScopedLock lock(previewLock);return previewData;}
 
