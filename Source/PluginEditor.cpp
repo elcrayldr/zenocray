@@ -89,6 +89,7 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  for(auto* slider:{&sampleStartSlider,&sampleEndSlider}){slider->setSliderStyle(juce::Slider::LinearHorizontal);slider->setTextBoxStyle(juce::Slider::TextBoxRight,false,40,18);slider->setColour(juce::Slider::thumbColourId,yellow);slider->setColour(juce::Slider::trackColourId,yellow);slider->setColour(juce::Slider::textBoxTextColourId,juce::Colours::white);slider->setColour(juce::Slider::textBoxBackgroundColourId,panel);addAndMakeVisible(*slider);}
  sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,"sampleStart",sampleStartSlider));
  sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,"sampleEnd",sampleEndSlider));
+ sampleStartSlider.onValueChange=[this]{repaint();};sampleEndSlider.onValueChange=[this]{repaint();};
  sampleLoopToggle.setButtonText("LOOP");sampleLoopToggle.setColour(juce::ToggleButton::textColourId,juce::Colours::white);addAndMakeVisible(sampleLoopToggle);
  buttonAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(processor.parameters,"sampleLoop",sampleLoopToggle));
 
