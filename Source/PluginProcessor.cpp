@@ -30,6 +30,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     p.add(std::make_unique<AudioParameterChoice>("lfoDestination","LFO Destination",StringArray{"Off","Pitch","Filter","Amplitude"},0));
     p.add(std::make_unique<AudioParameterFloat>("samplerLevel","Sampler Level",0.0f,1.0f,0.8f));
     p.add(std::make_unique<AudioParameterFloat>("sampleRoot", "Sample Root Note", NormalisableRange<float>(0.0f,127.0f,1.0f),60.0f));
+    p.add(std::make_unique<AudioParameterFloat>("sampleStart","Sample Start",0.0f,0.99f,0.0f));
+    p.add(std::make_unique<AudioParameterFloat>("sampleEnd","Sample End",0.01f,1.0f,1.0f));
+    p.add(std::make_unique<AudioParameterBool>("sampleLoop","Sample Loop",false));
     for (int i=1;i<=4;++i) {
         const auto suffix=String(i);
         p.add(std::make_unique<AudioParameterFloat>("osc"+suffix+"Level","OSC "+suffix+" Level",0.0f,1.0f,i==1?0.75f:0.0f));
@@ -50,7 +53,7 @@ static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce
     if(object==nullptr){error="Preset has no parameters object.";return false;}
     const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","chorusMix","reverbMix","lfoRate","lfoDepth","lfoDestination",
       "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
-      "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
+      "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot","sampleStart","sampleEnd","sampleLoop"};
     for(const auto* id:ids) {
         const auto value=object->getProperty(id);
         if(!value.isVoid()) {
@@ -138,6 +141,8 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     synth.renderNextBlock(b,m,0,b.getNumSamples());
     sampler.setLevel(load(cached.samplerLevel));
     sampler.setRootNote(static_cast<int>(load(cached.sampleRoot)));
+    sampler.setTrim(load(cached.sampleStart),load(cached.sampleEnd));
+    sampler.setLoop(load(cached.sampleLoop)>0.5f);
     sampler.processBlock(b,m);
     effects.setDrive(load(cached.drive));
     effects.setWidth(load(cached.width));
