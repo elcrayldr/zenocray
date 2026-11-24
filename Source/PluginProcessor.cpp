@@ -103,6 +103,10 @@ CRAYLDRUrbanInstrumentsAudioProcessor::~CRAYLDRUrbanInstrumentsAudioProcessor() 
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::File& file,std::function<void(bool,juce::String)> completion) {
     const int rootNote=static_cast<int>(parameters.getRawParameterValue("sampleRoot")->load());
+    loadSampleFromFileAsync(file,rootNote,std::move(completion));
+}
+
+void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::File& file,int rootNote,std::function<void(bool,juce::String)> completion) {
     auto* job=new FunctionThreadPoolJob("CRAY LDR sample import",[this,file,rootNote,completion=std::move(completion)]() mutable {
         juce::String error;
         const bool success=sampler.loadSampleFromFile(file,rootNote,error);
@@ -111,6 +115,14 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::
         });
     });
     sampleLoader.addJob(job,true);
+}
+
+void CRAYLDRUrbanInstrumentsAudioProcessor::restoreSampleZones(const std::vector<cray::SamplerEngine::ZoneInfo>& zones) {
+    sampler.clearZones();
+    for(const auto& zone:zones) {
+        const juce::File file(zone.filePath);
+        if(file.existsAsFile())loadSampleFromFileAsync(file,zone.rootNote,{});
+    }
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::prepareToPlay(double sr,int block) {
