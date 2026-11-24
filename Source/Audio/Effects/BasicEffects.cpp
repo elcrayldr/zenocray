@@ -46,14 +46,14 @@ void BasicEffects::process(juce::AudioBuffer<float>& buffer) noexcept {
         }
     }
 
-    if(numChannels>=2&&chorusMix>0.0001f) {
+    if(numChannels>=2) {
         chorus.setMix(chorusMix);
         juce::dsp::AudioBlock<float> block(buffer);
         juce::dsp::ProcessContextReplacing<float> context(block);
         chorus.process(context);
     }
 
-    if(reverbMix>0.0001f) {
+    {
         reverbParameters.roomSize=0.55f;
         reverbParameters.damping=0.42f;
         reverbParameters.wetLevel=0.33f*reverbMix;
