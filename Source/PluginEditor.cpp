@@ -20,6 +20,16 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  title.setFont(juce::Font(25.0f,juce::Font::bold));title.setColour(juce::Label::textColourId,yellow);addAndMakeVisible(title);
  subtitle.setText("FOUR-OSCILLATOR SYNTHESIS  •  64 VOICES",juce::dontSendNotification);
  subtitle.setFont(juce::Font(11.0f));subtitle.setColour(juce::Label::textColourId,muted);addAndMakeVisible(subtitle);
+ loadSampleButton.setColour(juce::TextButton::buttonColourId,yellow);loadSampleButton.setColour(juce::TextButton::textColourOffId,bg);addAndMakeVisible(loadSampleButton);
+ sampleStatus.setText(processor.getLoadedSampleName(),juce::dontSendNotification);sampleStatus.setColour(juce::Label::textColourId,muted);sampleStatus.setFont(juce::Font(10.0f));addAndMakeVisible(sampleStatus);
+ loadSampleButton.onClick=[this]{
+  sampleChooser=std::make_unique<juce::FileChooser>("Load audio sample",juce::File{},"*.wav;*.aif;*.aiff;*.flac");
+  sampleChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
+   const auto file=chooser.getResult();
+   if(file.existsAsFile()){juce::String error;if(processor.loadSampleFromFile(file,error))sampleStatus.setText(file.getFileName(),juce::dontSendNotification);else sampleStatus.setText(error,juce::dontSendNotification);}
+   sampleChooser.reset();
+  });
+ };
 
  const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width"};
  const char* names[]={"ATTACK","DECAY","SUSTAIN","RELEASE","FILTER CUTOFF","RESONANCE","MASTER","DRIVE","STEREO WIDTH"};
@@ -65,7 +75,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
- title.setBounds(24,18,getWidth()-48,38);subtitle.setBounds(26,58,getWidth()-52,20);
+ title.setBounds(24,18,650,38);subtitle.setBounds(26,58,650,20);loadSampleButton.setBounds(getWidth()-190,26,164,32);sampleStatus.setBounds(getWidth()-430,62,400,20);
  const int globalX=28,globalY=140,globalW=118,gap=4;
  for(int i=0;i<9;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
  for(int o=0;o<4;++o){
