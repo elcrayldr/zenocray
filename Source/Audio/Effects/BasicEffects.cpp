@@ -1,21 +1,40 @@
 #include "BasicEffects.h"
 #include <cmath>
+
 namespace cray {
 void BasicEffects::prepare(double, int, int) {}
-void BasicEffects::process(juce::AudioBuffer<float>& b) noexcept {
-    const int n = b.getNumSamples();
-    if (b.getNumChannels() == 1) {
-        auto* x = b.getWritePointer(0);
-        const float gain = 1.0f + drive * 8.0f;
-        for (int i=0;i<n;++i) x[i] = std::tanh(x[i] * gain) / std::tanh(gain);
+
+void BasicEffects::process(juce::AudioBuffer<float>& buffer) noexcept {
+    const int numSamples = buffer.getNumSamples();
+    const int numChannels = buffer.getNumChannels();
+    if (numSamples <= 0 || numChannels <= 0) return;
+
+    const float saturationMix = drive;
+    const float saturationGain = 1.0f + saturationMix * 8.0f;
+    const float normalisation = std::tanh(saturationGain);
+
+    if (numChannels == 1) {
+        auto* mono = buffer.getWritePointer(0);
+        for (int i = 0; i < numSamples; ++i) {
+            const float dry = mono[i];
+            const float saturated = std::tanh(dry * saturationGain) / normalisation;
+            mono[i] = dry + (saturated - dry) * saturationMix;
+        }
         return;
     }
-    auto* l=b.getWritePointer(0); auto* r=b.getWritePointer(1);
-    const float gain=1.0f+drive*8.0f, norm=std::tanh(gain);
-    for(int i=0;i<n;++i) {
-        const float mid=(l[i]+r[i])*0.5f, side=(l[i]-r[i])*0.5f*width;
-        l[i]=std::tanh((mid+side)*gain)/norm;
-        r[i]=std::tanh((mid-side)*gain)/norm;
+
+    auto* left = buffer.getWritePointer(0);
+    auto* right = buffer.getWritePointer(1);
+    for (int i = 0; i < numSamples; ++i) {
+        const float mid = (left[i] + right[i]) * 0.5f;
+        const float side = (left[i] - right[i]) * 0.5f * width;
+        const float widthLeft = mid + side;
+        const float widthRight = mid - side;
+
+        const float satLeft = std::tanh(widthLeft * saturationGain) / normalisation;
+        const float satRight = std::tanh(widthRight * saturationGain) / normalisation;
+        left[i] = widthLeft + (satLeft - widthLeft) * saturationMix;
+        right[i] = widthRight + (satRight - widthRight) * saturationMix;
     }
 }
 }
