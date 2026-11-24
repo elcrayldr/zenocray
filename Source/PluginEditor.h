@@ -11,7 +11,8 @@ private:
  using Slider=juce::Slider;
  CRAYLDRUrbanInstrumentsAudioProcessor& processor;
  juce::Label title,subtitle,sampleStatus;
- juce::TextButton loadSampleButton{"LOAD SAMPLE"};
+ juce::TextButton loadSampleButton{"LOAD SAMPLE"},savePresetButton{"SAVE PRESET"},loadPresetButton{"LOAD PRESET"};
+ std::unique_ptr<juce::FileChooser> presetChooser;
  std::unique_ptr<juce::FileChooser> sampleChooser;
  std::array<Slider,9> globalControls;
  std::array<juce::Label,9> globalLabels;
