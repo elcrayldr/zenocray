@@ -52,6 +52,8 @@ private:
         std::atomic<float>* masterLevel=nullptr;
         std::atomic<float>* drive=nullptr;
         std::atomic<float>* width=nullptr;
+        std::atomic<float>* chorusMix=nullptr;
+        std::atomic<float>* reverbMix=nullptr;
         std::atomic<float>* samplerLevel=nullptr;
         std::atomic<float>* sampleRoot=nullptr;
         std::array<std::atomic<float>*,4> oscillatorLevel{};
