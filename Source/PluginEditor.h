@@ -15,8 +15,8 @@ private:
  juce::ComboBox factoryPresetSelector;
  std::unique_ptr<juce::FileChooser> presetChooser;
  std::unique_ptr<juce::FileChooser> sampleChooser;
- std::array<Slider,11> globalControls;
- std::array<juce::Label,11> globalLabels;
+ std::array<Slider,13> globalControls;
+ std::array<juce::Label,13> globalLabels;
  std::array<std::array<Slider,3>,4> oscillatorControls;
  std::array<std::array<juce::Label,3>,4> oscillatorLabels;
  std::array<juce::ComboBox,4> oscillatorWaveforms;
