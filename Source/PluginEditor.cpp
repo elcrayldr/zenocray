@@ -15,7 +15,7 @@ void styleRotary(juce::Slider& s) {
 
 CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcessorEditor(CRAYLDRUrbanInstrumentsAudioProcessor& p)
 : AudioProcessorEditor(&p),processor(p) {
- setSize(1120,850);
+ setSize(1120,970);
  title.setText("CRAY LDR  /  URBAN INSTRUMENTS",juce::dontSendNotification);
  title.setFont(juce::Font(25.0f,juce::Font::bold));title.setColour(juce::Label::textColourId,yellow);addAndMakeVisible(title);
  subtitle.setText("FOUR-OSCILLATOR SYNTHESIS  •  64 VOICES",juce::dontSendNotification);
@@ -67,6 +67,18 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
   sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,ids[i],globalControls[i]));
  }
 
+ const char* lfoNames[]={"RATE","DEPTH"};
+ const char* lfoIds[]={"lfoRate","lfoDepth"};
+ for(int i=0;i<2;++i){
+  lfoLabels[i].setText(lfoNames[i],juce::dontSendNotification);lfoLabels[i].setJustificationType(juce::Justification::centred);
+  lfoLabels[i].setColour(juce::Label::textColourId,muted);addAndMakeVisible(lfoLabels[i]);
+  styleRotary(lfoControls[i]);addAndMakeVisible(lfoControls[i]);
+  sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,lfoIds[i],lfoControls[i]));
+ }
+ lfoDestinationLabel.setText("DESTINATION",juce::dontSendNotification);lfoDestinationLabel.setColour(juce::Label::textColourId,muted);lfoDestinationLabel.setJustificationType(juce::Justification::centred);addAndMakeVisible(lfoDestinationLabel);
+ lfoDestinationSelector.addItemList({"Off","Pitch","Filter","Amplitude"},1);
+ lfoDestinationSelector.setColour(juce::ComboBox::backgroundColourId,panel);lfoDestinationSelector.setColour(juce::ComboBox::textColourId,juce::Colours::white);addAndMakeVisible(lfoDestinationSelector);
+ comboAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processor.parameters,"lfoDestination",lfoDestinationSelector));
  for(int o=0;o<4;++o){
   const auto n=juce::String(o+1);
   const char* controlNames[]={"LEVEL","SEMITONES","FINE"};
@@ -93,11 +105,13 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  g.setColour(panel);g.fillRoundedRectangle(20.0f,108.0f,(float)getWidth()-40.0f,190.0f,9.0f);
  g.fillRoundedRectangle(20.0f,320.0f,(float)getWidth()-40.0f,370.0f,9.0f);
  g.fillRoundedRectangle(20.0f,710.0f,(float)getWidth()-40.0f,118.0f,9.0f);
+ g.fillRoundedRectangle(20.0f,840.0f,(float)getWidth()-40.0f,118.0f,9.0f);
  g.setColour(yellow);g.setFont(12.0f);g.drawText("GLOBAL VOICE / FILTER / OUTPUT",34,116,getWidth()-68,18,juce::Justification::left);
  g.drawText("OSCILLATOR LAYERING",34,328,getWidth()-68,18,juce::Justification::left);
- g.drawText("SAMPLE EDITOR / WAVEFORM OVERVIEW",34,718,getWidth()-68,18,juce::Justification::left);
+ g.drawText("LFO MODULATION",34,718,getWidth()-68,18,juce::Justification::left);
+ g.drawText("SAMPLE EDITOR / WAVEFORM OVERVIEW",34,848,getWidth()-68,18,juce::Justification::left);
  const auto& preview=processor.getSamplePreview();
- const float center=785.0f, halfHeight=38.0f, x0=260.0f, usableWidth=static_cast<float>(getWidth())-296.0f;
+ const float center=915.0f, halfHeight=34.0f, x0=260.0f, usableWidth=static_cast<float>(getWidth())-296.0f;
  g.setColour(juce::Colour(0xff343840));g.drawLine(x0,center,x0+usableWidth,center,1.0f);
  g.setColour(yellow);
  for(size_t i=0;i<preview.size();++i){const float x=x0+usableWidth*static_cast<float>(i)/static_cast<float>(preview.size()-1);const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.drawLine(x,center-h,x,center+h,1.2f);}
@@ -109,10 +123,13 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
- factoryPresetSelector.setBounds(34,744,205,30);
+ factoryPresetSelector.setBounds(34,874,205,30);
+ lfoLabels[0].setBounds(34,744,82,18);lfoControls[0].setBounds(30,760,90,62);
+ lfoLabels[1].setBounds(130,744,82,18);lfoControls[1].setBounds(126,760,90,62);
+ lfoDestinationLabel.setBounds(236,744,150,18);lfoDestinationSelector.setBounds(236,766,150,30);
  title.setBounds(24,18,590,38);subtitle.setBounds(26,58,590,20);savePresetButton.setBounds(getWidth()-494,26,112,32);loadPresetButton.setBounds(getWidth()-374,26,112,32);loadSampleButton.setBounds(getWidth()-254,26,132,32);clearSampleButton.setBounds(getWidth()-114,26,90,32);sampleStatus.setBounds(getWidth()-494,62,470,20);
  const int globalX=34,globalY=140,globalW=76,gap=4;
- for(int i=0;i<11;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
+ for(int i=0;i<13;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
  for(int o=0;o<4;++o){
   const int x=42+o*267;
   for(int c=0;c<3;++c){const int cx=x+c*78;oscillatorLabels[o][c].setBounds(cx,414,74,18);oscillatorControls[o][c].setBounds(cx,432,74,112);}
