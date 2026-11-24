@@ -57,7 +57,7 @@ void BasicEffects::process(juce::AudioBuffer<float>& buffer) noexcept {
         reverbParameters.roomSize=0.55f;
         reverbParameters.damping=0.42f;
         reverbParameters.wetLevel=0.33f*reverbMix;
-        reverbParameters.dryLevel=0.5f*(1.0f-0.5f*reverbMix);
+        reverbParameters.dryLevel=0.5f*(1.0f-reverbMix);
         reverbParameters.width=1.0f;
         reverbParameters.freezeMode=0.0f;
         reverb.setParameters(reverbParameters);
