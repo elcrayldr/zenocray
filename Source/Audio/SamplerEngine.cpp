@@ -43,15 +43,20 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
   sampleZones[static_cast<size_t>(zoneIndex)].store(raw,std::memory_order_release);
   sampleZoneCount.store(zoneIndex+1,std::memory_order_release);
   activeSample.store(raw,std::memory_order_release);
+  const juce::ScopedLock previewGuard(previewLock);
+  previewData=newPreview;
+  loadedName=file.getFileName();
  }
- {const juce::ScopedLock lock(previewLock);previewData=newPreview;loadedName=file.getFileName();}
  error.clear();
  return true;
 }
 
 void SamplerEngine::clearZones() noexcept {
- {const juce::ScopedLock zoneGuard(zoneLock);zoneGeneration.fetch_add(1,std::memory_order_acq_rel);sampleZoneCount.store(0,std::memory_order_release);activeSample.store(nullptr,std::memory_order_release);}
- const juce::ScopedLock lock(previewLock);
+ const juce::ScopedLock zoneGuard(zoneLock);
+ zoneGeneration.fetch_add(1,std::memory_order_acq_rel);
+ sampleZoneCount.store(0,std::memory_order_release);
+ activeSample.store(nullptr,std::memory_order_release);
+ const juce::ScopedLock previewGuard(previewLock);
  previewData.fill(0.0f);
  loadedName="NO SAMPLE LOADED";
 }
