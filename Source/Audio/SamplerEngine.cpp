@@ -4,7 +4,7 @@
 namespace cray {
 SamplerEngine::SamplerEngine(){for(auto& zone:sampleZones)zone.store(nullptr,std::memory_order_relaxed);}
 
-bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& error) {
+bool SamplerEngine::loadSampleFromFile(const juce::File& file,int rootNoteForSample,juce::String& error) {
  if(!file.existsAsFile()){error="File does not exist.";return false;}
  const unsigned int generation=zoneGeneration.load(std::memory_order_acquire);
  const int zoneIndex=sampleZoneCount.load(std::memory_order_acquire);
@@ -21,7 +21,7 @@ bool SamplerEngine::loadSampleFromFile(const juce::File& file,juce::String& erro
  auto data=std::make_unique<SampleData>();
  data->audio.setSize(channels,static_cast<int>(reader->lengthInSamples));
  data->sampleRate=reader->sampleRate;
- data->rootNote=rootNote.load(std::memory_order_relaxed);
+ data->rootNote=juce::jlimit(0,127,rootNoteForSample);
  data->name=file.getFileName();
  if(!reader->read(&data->audio,0,static_cast<int>(reader->lengthInSamples),0,true,channels>1)){
   error="Could not decode audio file.";return false;
