@@ -26,6 +26,9 @@ juce_add_plugin(CRAY_LDR_URBAN_INSTRUMENTS
   EDITOR_WANTS_KEYBOARD_FOCUS TRUE
   COPY_PLUGIN_AFTER_BUILD FALSE)
 
+# Generate JuceHeader.h for the plugin target.
+juce_generate_juce_header(CRAY_LDR_URBAN_INSTRUMENTS)
+
 target_sources(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
   Source/PluginProcessor.cpp
   Source/PluginProcessor.h
