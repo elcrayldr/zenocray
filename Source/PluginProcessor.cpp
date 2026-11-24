@@ -85,7 +85,6 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
     cached.lfoDepth=parameters.getRawParameterValue("lfoDepth");
     cached.lfoDestination=parameters.getRawParameterValue("lfoDestination");
     cached.samplerLevel=parameters.getRawParameterValue("samplerLevel");
-    cached.sampleRoot=parameters.getRawParameterValue("sampleRoot");
     cached.sampleStart=parameters.getRawParameterValue("sampleStart");
     cached.sampleEnd=parameters.getRawParameterValue("sampleEnd");
     cached.sampleLoop=parameters.getRawParameterValue("sampleLoop");
@@ -103,10 +102,10 @@ CRAYLDRUrbanInstrumentsAudioProcessor::~CRAYLDRUrbanInstrumentsAudioProcessor() 
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::File& file,std::function<void(bool,juce::String)> completion) {
-    sampler.setRootNote(static_cast<int>(parameters.getRawParameterValue("sampleRoot")->load()));
-    auto* job=new FunctionThreadPoolJob("CRAY LDR sample import",[this,file,completion=std::move(completion)]() mutable {
+    const int rootNote=static_cast<int>(parameters.getRawParameterValue("sampleRoot")->load());
+    auto* job=new FunctionThreadPoolJob("CRAY LDR sample import",[this,file,rootNote,completion=std::move(completion)]() mutable {
         juce::String error;
-        const bool success=sampler.loadSampleFromFile(file,error);
+        const bool success=sampler.loadSampleFromFile(file,rootNote,error);
         juce::MessageManager::callAsync([completion=std::move(completion),success,error]() mutable {
             if(completion) completion(success,error);
         });
@@ -143,7 +142,6 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     b.clear();
     synth.renderNextBlock(b,m,0,b.getNumSamples());
     sampler.setLevel(load(cached.samplerLevel));
-    sampler.setRootNote(static_cast<int>(load(cached.sampleRoot)));
     sampler.setTrim(load(cached.sampleStart),load(cached.sampleEnd));
     sampler.setLoop(load(cached.sampleLoop)>0.5f);
     sampler.processBlock(b,m);
