@@ -17,7 +17,8 @@ void SynthVoice::setParameters(float a, float d, float s, float r, float c, floa
 }
 void SynthVoice::startNote(int note, float velocity, juce::SynthesiserSound*, int) {
     velocityGain = velocity;
-    const auto hz = juce::MidiMessage::getMidiNoteInHertz(note) * pitchRatio;
+    // Store the unbent note increment here; pitch bend is applied once in renderOscillator().
+    const auto hz = juce::MidiMessage::getMidiNoteInHertz(note);
     increment = hz / sr;
     envParams.attack = attackMs / 1000.0f; envParams.decay = decayMs / 1000.0f;
     envParams.sustain = sustain; envParams.release = releaseMs / 1000.0f;
@@ -46,7 +47,7 @@ float SynthVoice::renderOscillator() {
     return x;
 }
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& out, int start, int count) {
-    if (!isVoiceActive()) return;
+    if (!isVoiceActive() || out.getNumChannels() == 0) return;
     auto* left = out.getWritePointer(0, start);
     auto* right = out.getNumChannels() > 1 ? out.getWritePointer(1, start) : nullptr;
     filter.setCutoffFrequency(cutoffHz); filter.setResonance(resonance);
