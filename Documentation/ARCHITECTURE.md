@@ -1,20 +1,20 @@
 # Architecture
 
-- PluginProcessor: host integration, APVTS parameters, MIDI dispatch and versioned state.
+- PluginProcessor: host integration, APVTS parameters, MIDI dispatch, versioned state and background sample-load job queue.
 - SynthVoice: four independent oscillator layers per voice, per-oscillator pitch/level/waveform, envelope and low-pass filter.
-- SamplerEngine: 32 sample playback voices, sample-rate conversion, note tracking and sample import through JUCE AudioFormatManager.
+- SamplerEngine: 32 sample playback voices, up to 16 imported root-note zones, nearest-root selection, sample-rate conversion and MIDI note tracking.
 - BasicEffects: post-instrument drive and stereo width.
-- PluginEditor: native JUCE controls, oscillator layer panels, sample import, waveform overview and preset file actions.
+- PluginEditor: native JUCE controls, oscillator layer panels, async sample import, waveform overview, embedded factory preset selector and user preset file actions.
 
 ## Realtime constraints
 
 - Audio-thread code must not allocate, perform file I/O, block on locks, or access UI objects.
-- Sample file decoding and waveform overview calculation run on a dedicated background worker, not in the audio callback or the editor/message thread.
-- Sample buffers are immutable after publication and retained for the lifetime of the processor so active sample voices never observe freed memory. Repeated imports therefore consume memory until the plugin instance is closed; the loader has a five-minute per-file limit and a 512 MB retained-sample budget per plugin instance.
+- Sample decoding and waveform overview calculation run on a dedicated worker. Preview publication uses a short UI-side critical section; the audio callback only reads immutable sample buffers through published atomic pointers.
+- Sample buffers are immutable after publication and retained for the lifetime of the processor so active sample voices never observe freed memory. Repeated imports consume memory until the plugin instance closes; limits are 16 zones, five minutes per file and 512 MB retained sample data per plugin instance.
+- The sampler captures the selected root note when each sample is imported. MIDI notes use the sample zone with the nearest root note; velocity layers and explicit zone boundaries are not implemented.
 - Parameter changes remain host-automatable through APVTS.
-- State is serialized as XML with a schema version. User preset files use .craypreset; factory JSON presets are mapped by parameter ID.
-- The sampler currently maps one imported sample across the keyboard from a user-adjustable root note. Keygroups, velocity layers, loop regions and trim points are not implemented yet.
+- State is serialized as XML with a schema version. User preset files use .craypreset; factory JSON resources are embedded and mapped by parameter ID.
 
 ## Validation
 
-The Windows GitHub Actions workflow configures JUCE 8.0.6 and builds the VST3/Standalone targets in Release. CI success does not replace validation in FL Studio 26 and Cubase 13, nor audio-thread stress testing on a local Windows system.
+The Windows GitHub Actions workflow configures JUCE 8.0.6 and builds the VST3/Standalone targets in Release, then runs portable DSP sanity tests. CI success does not replace validation in FL Studio 26 and Cubase 13, nor audio-thread stress testing on a local Windows system.
