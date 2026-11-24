@@ -21,6 +21,7 @@ public:
  std::array<float,256> getPreviewData() const;
  bool hasSample() const noexcept { return activeSample.load(std::memory_order_acquire)!=nullptr; }
  std::vector<ZoneInfo> getZoneInfos() const;
+ int getZoneCount() const noexcept { return sampleZoneCount.load(std::memory_order_acquire); }
 private:
  struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name,filePath; };
  struct Voice { const SampleData* sample=nullptr; double position=0.0,increment=1.0,startSample=0.0,endSample=0.0; float velocity=0.0f; int note=-1,releaseRemaining=0,releaseTotal=0; bool loop=false,active=false; };
