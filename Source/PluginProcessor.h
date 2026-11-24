@@ -59,6 +59,9 @@ private:
         std::atomic<float>* lfoDestination=nullptr;
         std::atomic<float>* samplerLevel=nullptr;
         std::atomic<float>* sampleRoot=nullptr;
+        std::atomic<float>* sampleStart=nullptr;
+        std::atomic<float>* sampleEnd=nullptr;
+        std::atomic<float>* sampleLoop=nullptr;
         std::array<std::atomic<float>*,4> oscillatorLevel{};
         std::array<std::atomic<float>*,4> oscillatorSemitone{};
         std::array<std::atomic<float>*,4> oscillatorFine{};
