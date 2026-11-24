@@ -2,6 +2,15 @@
 #include "PluginEditor.h"
 #include <BinaryData.h>
 
+class FunctionThreadPoolJob final : public juce::ThreadPoolJob {
+public:
+    FunctionThreadPoolJob(juce::String name,std::function<void()> task)
+        : juce::ThreadPoolJob(std::move(name)),work(std::move(task)) {}
+    JobStatus runJob() override { work(); return jobHasFinished; }
+private:
+    std::function<void()> work;
+};
+
 static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     using namespace juce;
     AudioProcessorValueTreeState::ParameterLayout p;
@@ -53,6 +62,21 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
   parameters(*this,nullptr,"CRAY_STATE",makeParams()) {
     for(int i=0;i<64;++i) synth.addVoice(new cray::SynthVoice());
     synth.addSound(new cray::SynthSound());
+}
+
+CRAYLDRUrbanInstrumentsAudioProcessor::~CRAYLDRUrbanInstrumentsAudioProcessor() {
+    sampleLoader.removeAllJobs(true,-1);
+}
+
+void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::File& file,std::function<void(bool,juce::String)> completion) {
+    auto* job=new FunctionThreadPoolJob("CRAY LDR sample import",[this,file,completion=std::move(completion)]() mutable {
+        juce::String error;
+        const bool success=sampler.loadSampleFromFile(file,error);
+        juce::MessageManager::callAsync([completion=std::move(completion),success,error]() mutable {
+            if(completion) completion(success,error);
+        });
+    });
+    sampleLoader.addJob(job,true);
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::prepareToPlay(double sr,int block) {
