@@ -12,6 +12,7 @@
 - Sample decoding and waveform overview calculation run on a dedicated worker. Preview publication uses a short UI-side critical section; the audio callback only reads immutable sample buffers through published atomic pointers.
 - Sample buffers are immutable after publication and retained for the lifetime of the processor so active sample voices never observe freed memory. Repeated imports consume memory until the plugin instance closes; limits are 16 zones, five minutes per file and 512 MB retained sample data per plugin instance.
 - The sampler captures the selected root note when each sample is imported. MIDI notes use the sample zone with the nearest root note; velocity layers and explicit zone boundaries are not implemented.
+- APVTS raw parameter atomics and voice pointers are cached before audio processing; the callback performs no parameter-ID string lookups.
 - Parameter changes remain host-automatable through APVTS.
 - State is serialized as XML with a schema version. User preset files use .craypreset; factory JSON resources are embedded and mapped by parameter ID.
 
