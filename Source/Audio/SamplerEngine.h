@@ -13,8 +13,8 @@ public:
  void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
  void setRootNote(int note) noexcept { rootNote.store(juce::jlimit(0,127,note),std::memory_order_relaxed); }
  void processBlock(juce::AudioBuffer<float>& output,const juce::MidiBuffer& midi) noexcept;
- juce::String getLoadedSampleName() const { return loadedName; }
- const std::array<float,256>& getPreviewData() const noexcept { return previewData; }
+ juce::String getLoadedSampleName() const;
+ std::array<float,256> getPreviewData() const;
  bool hasSample() const noexcept { return activeSample.load(std::memory_order_acquire)!=nullptr; }
 private:
  struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name; };
@@ -22,6 +22,7 @@ private:
  static constexpr int maxVoices=32;
  std::array<Voice,maxVoices> voices{};
  std::array<float,256> previewData{};
+ mutable juce::CriticalSection previewLock;
  std::vector<std::unique_ptr<SampleData>> ownedSamples;
  std::atomic<SampleData*> activeSample{nullptr};
  std::atomic<float> outputLevel{0.8f};
