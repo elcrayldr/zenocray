@@ -15,7 +15,7 @@ void styleRotary(juce::Slider& s) {
 
 CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcessorEditor(CRAYLDRUrbanInstrumentsAudioProcessor& p)
 : AudioProcessorEditor(&p),processor(p) {
- setSize(1120,720);
+ setSize(1120,850);
  title.setText("CRAY LDR  /  URBAN INSTRUMENTS",juce::dontSendNotification);
  title.setFont(juce::Font(25.0f,juce::Font::bold));title.setColour(juce::Label::textColourId,yellow);addAndMakeVisible(title);
  subtitle.setText("FOUR-OSCILLATOR SYNTHESIS  •  64 VOICES",juce::dontSendNotification);
@@ -79,8 +79,15 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  g.setColour(yellow);g.fillRoundedRectangle(24.0f,88.0f,(float)getWidth()-48.0f,2.0f,1.0f);
  g.setColour(panel);g.fillRoundedRectangle(20.0f,108.0f,(float)getWidth()-40.0f,190.0f,9.0f);
  g.fillRoundedRectangle(20.0f,320.0f,(float)getWidth()-40.0f,370.0f,9.0f);
+ g.fillRoundedRectangle(20.0f,710.0f,(float)getWidth()-40.0f,118.0f,9.0f);
  g.setColour(yellow);g.setFont(12.0f);g.drawText("GLOBAL VOICE / FILTER / OUTPUT",34,116,getWidth()-68,18,juce::Justification::left);
  g.drawText("OSCILLATOR LAYERING",34,328,getWidth()-68,18,juce::Justification::left);
+ g.drawText("SAMPLE EDITOR / WAVEFORM OVERVIEW",34,718,getWidth()-68,18,juce::Justification::left);
+ const auto& preview=processor.getSamplePreview();
+ const float center=785.0f, halfHeight=38.0f, x0=36.0f, usableWidth=static_cast<float>(getWidth())-72.0f;
+ g.setColour(juce::Colour(0xff343840));g.drawLine(x0,center,x0+usableWidth,center,1.0f);
+ g.setColour(yellow);
+ for(size_t i=0;i<preview.size();++i){const float x=x0+usableWidth*static_cast<float>(i)/static_cast<float>(preview.size()-1);const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.drawLine(x,center-h,x,center+h,1.2f);}
  for(int i=0;i<4;++i){
   const int x=34+i*267;
   g.setColour(juce::Colour(0xff292c32));g.fillRoundedRectangle((float)x,354.0f,250.0f,320.0f,8.0f);
