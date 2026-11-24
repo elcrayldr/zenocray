@@ -9,11 +9,10 @@ namespace cray {
 class SamplerEngine {
 public:
  SamplerEngine();
- bool loadSampleFromFile(const juce::File& file, juce::String& error);
+ bool loadSampleFromFile(const juce::File& file,int rootNote,juce::String& error);
  void clearZones() noexcept;
  void prepare(double sampleRate) noexcept;
  void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
- void setRootNote(int note) noexcept { rootNote.store(juce::jlimit(0,127,note),std::memory_order_relaxed); }
  void setTrim(float start,float end) noexcept { trimStart.store(juce::jlimit(0.0f,0.99f,start),std::memory_order_relaxed);trimEnd.store(juce::jlimit(0.01f,1.0f,end),std::memory_order_relaxed); }
  void setLoop(bool enabled) noexcept { loopEnabled.store(enabled,std::memory_order_relaxed); }
  void processBlock(juce::AudioBuffer<float>& output,const juce::MidiBuffer& midi) noexcept;
@@ -35,7 +34,6 @@ private:
  std::atomic<unsigned int> zoneGeneration{0};
  juce::CriticalSection zoneLock;
  std::atomic<float> outputLevel{0.8f};
- std::atomic<int> rootNote{60};
  std::atomic<float> trimStart{0.0f},trimEnd{1.0f};
  std::atomic<bool> loopEnabled{false};
  size_t ownedSampleBytes=0;
