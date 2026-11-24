@@ -6,7 +6,7 @@ Independent implementation of a Windows x64 virtual instrument using JUCE 8.0.6 
 
 - 64-voice subtractive synth with four independent oscillators.
 - Per-oscillator waveform, level, semitone and fine tuning.
-- ADSR envelope, low-pass filter, drive and stereo width.
+- ADSR envelope, low-pass filter, drive, stereo width, chorus and reverb.
 - Polyphonic sample layer with 32 voices and up to 16 root-note zones.
 - WAV, AIFF and FLAC import on a dedicated background worker.
 - Nearest-root-note sample mapping, adjustable root note for each imported zone, and sampler output level.
