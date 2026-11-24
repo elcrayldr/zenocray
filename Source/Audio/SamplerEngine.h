@@ -10,6 +10,8 @@ class SamplerEngine {
 public:
  bool loadSampleFromFile(const juce::File& file, juce::String& error);
  void prepare(double sampleRate) noexcept;
+ void setLevel(float value) noexcept { outputLevel.store(juce::jlimit(0.0f,1.0f,value),std::memory_order_relaxed); }
+ void setRootNote(int note) noexcept { rootNote.store(juce::jlimit(0,127,note),std::memory_order_relaxed); }
  void processBlock(juce::AudioBuffer<float>& output,const juce::MidiBuffer& midi) noexcept;
  juce::String getLoadedSampleName() const { return loadedName; }
  const std::array<float,256>& getPreviewData() const noexcept { return previewData; }
@@ -22,6 +24,9 @@ private:
  std::array<float,256> previewData{};
  std::vector<std::unique_ptr<SampleData>> ownedSamples;
  std::atomic<SampleData*> activeSample{nullptr};
+ std::atomic<float> outputLevel{0.8f};
+ std::atomic<int> rootNote{60};
+ size_t ownedSampleBytes=0;
  double hostSampleRate=44100.0;
  juce::String loadedName{"NO SAMPLE LOADED"};
  void handleMidi(const juce::MidiMessage&) noexcept;
