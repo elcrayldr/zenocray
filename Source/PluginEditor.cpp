@@ -84,6 +84,14 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  lfoDestinationSelector.addItemList({"Off","Pitch","Filter","Amplitude"},1);
  lfoDestinationSelector.setColour(juce::ComboBox::backgroundColourId,panel);lfoDestinationSelector.setColour(juce::ComboBox::textColourId,juce::Colours::white);addAndMakeVisible(lfoDestinationSelector);
  comboAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(processor.parameters,"lfoDestination",lfoDestinationSelector));
+ sampleStartLabel.setText("START",juce::dontSendNotification);sampleStartLabel.setColour(juce::Label::textColourId,muted);sampleStartLabel.setJustificationType(juce::Justification::centred);addAndMakeVisible(sampleStartLabel);
+ sampleEndLabel.setText("END",juce::dontSendNotification);sampleEndLabel.setColour(juce::Label::textColourId,muted);sampleEndLabel.setJustificationType(juce::Justification::centred);addAndMakeVisible(sampleEndLabel);
+ for(auto* slider:{&sampleStartSlider,&sampleEndSlider}){slider->setSliderStyle(juce::Slider::LinearHorizontal);slider->setTextBoxStyle(juce::Slider::TextBoxRight,false,40,18);slider->setColour(juce::Slider::thumbColourId,yellow);slider->setColour(juce::Slider::trackColourId,yellow);slider->setColour(juce::Slider::textBoxTextColourId,juce::Colours::white);slider->setColour(juce::Slider::textBoxBackgroundColourId,panel);addAndMakeVisible(*slider);}
+ sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,"sampleStart",sampleStartSlider));
+ sliderAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor.parameters,"sampleEnd",sampleEndSlider));
+ sampleLoopToggle.setButtonText("LOOP");sampleLoopToggle.setColour(juce::ToggleButton::textColourId,juce::Colours::white);addAndMakeVisible(sampleLoopToggle);
+ buttonAttachments.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(processor.parameters,"sampleLoop",sampleLoopToggle));
+
  for(int o=0;o<4;++o){
   const auto n=juce::String(o+1);
   const char* controlNames[]={"LEVEL","SEMITONES","FINE"};
@@ -116,7 +124,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  g.drawText("LFO MODULATION",34,718,getWidth()-68,18,juce::Justification::left);
  g.drawText("SAMPLE EDITOR / WAVEFORM OVERVIEW",34,848,getWidth()-68,18,juce::Justification::left);
  const auto& preview=processor.getSamplePreview();
- const float center=915.0f, halfHeight=34.0f, x0=260.0f, usableWidth=static_cast<float>(getWidth())-296.0f;
+ const float center=915.0f, halfHeight=34.0f, x0=330.0f, usableWidth=static_cast<float>(getWidth())-366.0f;
  g.setColour(juce::Colour(0xff343840));g.drawLine(x0,center,x0+usableWidth,center,1.0f);
  g.setColour(yellow);
  for(size_t i=0;i<preview.size();++i){const float x=x0+usableWidth*static_cast<float>(i)/static_cast<float>(preview.size()-1);const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.drawLine(x,center-h,x,center+h,1.2f);}
@@ -128,7 +136,10 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
- factoryPresetSelector.setBounds(34,874,205,30);
+ factoryPresetSelector.setBounds(410,766,205,30);
+ sampleStartLabel.setBounds(32,874,94,18);sampleStartSlider.setBounds(30,892,100,34);
+ sampleEndLabel.setBounds(138,874,94,18);sampleEndSlider.setBounds(136,892,100,34);
+ sampleLoopToggle.setBounds(240,890,82,36);
  lfoLabels[0].setBounds(34,744,82,18);lfoControls[0].setBounds(30,760,90,62);
  lfoLabels[1].setBounds(130,744,82,18);lfoControls[1].setBounds(126,760,90,62);
  lfoDestinationLabel.setBounds(236,744,150,18);lfoDestinationSelector.setBounds(236,766,150,30);
