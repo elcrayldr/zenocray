@@ -1,33 +1,29 @@
 # CRAY LDR URBAN INSTRUMENTS
 
-Independent development line for a Windows x64 VST3 instrument built with JUCE 8.0.6 and C++17.
+Independent implementation of a Windows x64 virtual instrument using JUCE 8.0.6 and C++17.
 
-## Current status
+## Implemented in the current development line
 
-This repository is being initialized from the independent 0.1.0 development baseline. The current milestone is an architectural/audio-engine prototype, not a release-ready instrument. It has not yet been validated in FL Studio or Cubase.
+- 64-voice subtractive synth with four independent oscillators.
+- Per-oscillator waveform, level, semitone and fine tuning.
+- ADSR envelope, low-pass filter, drive and stereo width.
+- Polyphonic one-shot sample layer with 32 voices.
+- WAV, AIFF and FLAC import using JUCE AudioFormatManager.
+- Sample waveform overview in the editor.
+- User preset save/load (.craypreset) and factory JSON preset loading.
+- VST3 and Standalone targets.
 
-## Planned scope
+## Current limitations
 
-- Four-oscillator subtractive synthesis engine
-- Multisample sampler (WAV/AIFF/FLAC)
-- Factory and user libraries
-- Preset management and versioned plugin state
-- Sample editor and instrument builder
-- Modulation and effects
-- Native JUCE interface
-- Windows x64 VST3 and standalone builds
+The sampler currently maps one imported sample across the keyboard with MIDI note 60 as its root. Keygroups, velocity layers, loop and trim editing, root-note controls, a modulation matrix, LFOs and a full effects rack remain in development. Sample imports are decoded from the editor thread and old sample buffers are retained until the plugin instance closes to guarantee safe audio-thread ownership.
+
+This is a development prototype, not a release-ready product. The Windows CI build is a compile check; FL Studio 26 and Cubase 13 validation and realtime stress testing remain outstanding.
 
 ## Build
 
-Requires Visual Studio 2022 (Desktop development with C++), CMake 3.22+, and a working internet connection for the pinned JUCE FetchContent dependency.
+Requires Visual Studio 2022 (Desktop development with C++), CMake 3.22+, and an internet connection for the pinned JUCE FetchContent dependency.
 
 ```powershell
 cmake -S . -B build -A x64
 cmake --build build --config Release
 ```
-
-The VST3 target is generated under the build tree. Exact output paths depend on the CMake generator.
-
-## Important
-
-Do not treat the current baseline as production-ready. Real-time safety, sampler loading, full preset serialization, parameter coverage, UI workflows, and host compatibility require further implementation and testing.
