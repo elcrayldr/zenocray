@@ -8,6 +8,7 @@
 namespace cray {
 class SamplerEngine {
 public:
+ struct ZoneInfo { juce::String filePath; int rootNote=60; };
  SamplerEngine();
  bool loadSampleFromFile(const juce::File& file,int rootNote,juce::String& error);
  void clearZones() noexcept;
@@ -19,8 +20,9 @@ public:
  juce::String getLoadedSampleName() const;
  std::array<float,256> getPreviewData() const;
  bool hasSample() const noexcept { return activeSample.load(std::memory_order_acquire)!=nullptr; }
+ std::vector<ZoneInfo> getZoneInfos() const;
 private:
- struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name; };
+ struct SampleData { juce::AudioBuffer<float> audio; double sampleRate=44100.0; int rootNote=60; juce::String name,filePath; };
  struct Voice { const SampleData* sample=nullptr; double position=0.0,increment=1.0,startSample=0.0,endSample=0.0; float velocity=0.0f; int note=-1,releaseRemaining=0,releaseTotal=0; bool loop=false,active=false; };
  static constexpr int maxVoices=32;
  static constexpr int maxZones=16;
@@ -32,7 +34,7 @@ private:
  std::array<std::atomic<SampleData*>,maxZones> sampleZones{};
  std::atomic<int> sampleZoneCount{0};
  std::atomic<unsigned int> zoneGeneration{0};
- juce::CriticalSection zoneLock;
+ mutable juce::CriticalSection zoneLock;
  std::atomic<float> outputLevel{0.8f};
  std::atomic<float> trimStart{0.0f},trimEnd{1.0f};
  std::atomic<bool> loopEnabled{false};
