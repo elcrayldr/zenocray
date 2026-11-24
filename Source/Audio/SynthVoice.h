@@ -16,7 +16,7 @@ public:
  void controllerMoved(int,int) override {}
  void renderNextBlock(juce::AudioBuffer<float>&,int,int) override;
  void prepare(double);
- void setParameters(float,float,float,float,float,float,float);
+ void setParameters(float,float,float,float,float,float,float,float,float,int);
  void setOscillator(int,float,float,float,int) noexcept;
 private:
  static constexpr int oscillatorCount=4;
@@ -30,11 +30,14 @@ private:
  float velocityGain=0.0f,pitchRatio=1.0f;
  float attackMs=8.0f,decayMs=180.0f,sustain=0.78f,releaseMs=160.0f;
  float cutoffHz=12000.0f,resonance=0.15f,masterLevel=0.2f;
+ float lfoRateHz=0.5f,lfoDepth=0.0f;
+ int lfoDestination=0;
+ double lfoPhase=0.0;
  juce::ADSR envelope;
  juce::ADSR::Parameters envParams;
  juce::dsp::StateVariableTPTFilter<float> filter;
  juce::Random random;
- float renderOscillator(int) noexcept;
+ float renderOscillator(int,float pitchRatioForSample) noexcept;
  static float polyBlep(float,float) noexcept;
 };
 }
