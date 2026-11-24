@@ -2,6 +2,7 @@
 #include <JuceHeader.h>
 #include "Audio/SynthVoice.h"
 #include "Audio/Effects/BasicEffects.h"
+#include "Audio/SamplerEngine.h"
 
 class CRAYLDRUrbanInstrumentsAudioProcessor final : public juce::AudioProcessor {
 public:
@@ -26,9 +27,12 @@ public:
     void getStateInformation(juce::MemoryBlock&) override;
     void setStateInformation(const void*, int) override;
     juce::AudioProcessorValueTreeState parameters;
+    bool loadSampleFromFile(const juce::File& file, juce::String& error) { return sampler.loadSampleFromFile(file, error); }
+    juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
 private:
     juce::Synthesiser synth;
     cray::BasicEffects effects;
+    cray::SamplerEngine sampler;
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRAYLDRUrbanInstrumentsAudioProcessor)
 };
