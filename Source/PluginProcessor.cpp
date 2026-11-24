@@ -86,6 +86,9 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
     cached.lfoDestination=parameters.getRawParameterValue("lfoDestination");
     cached.samplerLevel=parameters.getRawParameterValue("samplerLevel");
     cached.sampleRoot=parameters.getRawParameterValue("sampleRoot");
+    cached.sampleStart=parameters.getRawParameterValue("sampleStart");
+    cached.sampleEnd=parameters.getRawParameterValue("sampleEnd");
+    cached.sampleLoop=parameters.getRawParameterValue("sampleLoop");
     for(int osc=0;osc<4;++osc){
         const auto n=juce::String(osc+1);
         cached.oscillatorLevel[static_cast<size_t>(osc)]=parameters.getRawParameterValue("osc"+n+"Level");
