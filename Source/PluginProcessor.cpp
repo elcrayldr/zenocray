@@ -91,6 +91,26 @@ bool CRAYLDRUrbanInstrumentsAudioProcessor::savePresetToFile(const juce::File& f
 
 bool CRAYLDRUrbanInstrumentsAudioProcessor::loadPresetFromFile(const juce::File& file,juce::String& error) {
     if(!file.existsAsFile()){error="Preset file does not exist.";return false;}
+    if(file.hasFileExtension("json")) {
+        const auto parsed=juce::JSON::parse(file.loadFileAsString());
+        auto* root=parsed.getDynamicObject();
+        if(root==nullptr){error="Invalid JSON preset.";return false;}
+        const auto values=root->getProperty("parameters");
+        auto* object=values.getDynamicObject();
+        if(object==nullptr){error="Preset has no parameters object.";return false;}
+        const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width",
+          "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
+          "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave"};
+        for(const auto* id:ids) {
+            const auto value=object->getProperty(id);
+            if(!value.isVoid()) {
+                if(auto* parameter=dynamic_cast<juce::RangedAudioParameter*>(parameters.getParameter(id)))
+                    parameter->setValueNotifyingHost(parameter->convertTo0to1(static_cast<float>(value)));
+            }
+        }
+        error.clear();
+        return true;
+    }
     auto xml=juce::XmlDocument::parse(file.loadFileAsString());
     if(xml==nullptr||!xml->hasTagName(parameters.state.getType())){error="Invalid CRAY LDR preset file.";return false;}
     auto state=juce::ValueTree::fromXml(*xml);
