@@ -36,6 +36,8 @@ target_sources(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
   Source/PluginEditor.h
   Source/Audio/SynthVoice.cpp
   Source/Audio/SynthVoice.h
+  Source/Audio/SamplerEngine.cpp
+  Source/Audio/SamplerEngine.h
   Source/Audio/Effects/BasicEffects.cpp
   Source/Audio/Effects/BasicEffects.h
   Source/GUI/LookAndFeel.cpp
@@ -44,6 +46,6 @@ target_sources(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
 target_compile_definitions(CRAY_LDR_URBAN_INSTRUMENTS PUBLIC
   JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(CRAY_LDR_URBAN_INSTRUMENTS PRIVATE
-  juce::juce_audio_utils juce::juce_dsp juce::juce_gui_extra
+  juce::juce_audio_utils juce::juce_audio_formats juce::juce_dsp juce::juce_gui_extra
   PUBLIC juce::juce_recommended_config_flags juce::juce_recommended_lto_flags
   juce::juce_recommended_warning_flags)
