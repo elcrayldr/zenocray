@@ -1,0 +1,23 @@
+name: Windows VST3 build
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -A x64
+      - name: Build Release
+        run: cmake --build build --config Release --parallel
+      - name: Upload VST3 artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CRAY-LDR-URBAN-INSTRUMENTS-Windows-x64
+          path: build/**/CRAY LDR URBAN INSTRUMENTS.vst3
+          if-no-files-found: warn
