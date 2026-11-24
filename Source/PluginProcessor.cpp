@@ -25,6 +25,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeParams() {
     p.add(std::make_unique<AudioParameterFloat>("width","Stereo Width",0.0f,2.0f,1.0f));
     p.add(std::make_unique<AudioParameterFloat>("chorusMix","Chorus",0.0f,1.0f,0.0f));
     p.add(std::make_unique<AudioParameterFloat>("reverbMix","Reverb",0.0f,1.0f,0.0f));
+    p.add(std::make_unique<AudioParameterFloat>("lfoRate","LFO Rate",NormalisableRange<float>(0.01f,20.0f,0.01f,0.35f),0.5f));
+    p.add(std::make_unique<AudioParameterFloat>("lfoDepth","LFO Depth",0.0f,1.0f,0.0f));
+    p.add(std::make_unique<AudioParameterChoice>("lfoDestination","LFO Destination",StringArray{"Off","Pitch","Filter","Amplitude"},0));
     p.add(std::make_unique<AudioParameterFloat>("samplerLevel","Sampler Level",0.0f,1.0f,0.8f));
     p.add(std::make_unique<AudioParameterFloat>("sampleRoot", "Sample Root Note", NormalisableRange<float>(0.0f,127.0f,1.0f),60.0f));
     for (int i=1;i<=4;++i) {
@@ -45,7 +48,7 @@ static bool applyJsonPreset(juce::AudioProcessorValueTreeState& state,const juce
     const auto values=root->getProperty("parameters");
     auto* object=values.getDynamicObject();
     if(object==nullptr){error="Preset has no parameters object.";return false;}
-    const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","chorusMix","reverbMix",
+    const char* ids[]={"attack","decay","sustain","release","cutoff","resonance","level","drive","width","chorusMix","reverbMix","lfoRate","lfoDepth","lfoDestination",
       "osc1Level","osc1Semi","osc1Fine","osc1Wave","osc2Level","osc2Semi","osc2Fine","osc2Wave",
       "osc3Level","osc3Semi","osc3Fine","osc3Wave","osc4Level","osc4Semi","osc4Fine","osc4Wave","samplerLevel","sampleRoot"};
     for(const auto* id:ids) {
@@ -75,6 +78,9 @@ CRAYLDRUrbanInstrumentsAudioProcessor::CRAYLDRUrbanInstrumentsAudioProcessor()
     cached.width=parameters.getRawParameterValue("width");
     cached.chorusMix=parameters.getRawParameterValue("chorusMix");
     cached.reverbMix=parameters.getRawParameterValue("reverbMix");
+    cached.lfoRate=parameters.getRawParameterValue("lfoRate");
+    cached.lfoDepth=parameters.getRawParameterValue("lfoDepth");
+    cached.lfoDestination=parameters.getRawParameterValue("lfoDestination");
     cached.samplerLevel=parameters.getRawParameterValue("samplerLevel");
     cached.sampleRoot=parameters.getRawParameterValue("sampleRoot");
     for(int osc=0;osc<4;++osc){
@@ -120,7 +126,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessor::processBlock(AudioBuffer<float>& b,M
     for(auto* voice:synthVoices) {
         if(voice!=nullptr) {
             voice->setParameters(load(cached.attack),load(cached.decay),load(cached.sustain),load(cached.release),
-                                 load(cached.cutoff),load(cached.resonance),load(cached.masterLevel));
+                                 load(cached.cutoff),load(cached.resonance),load(cached.masterLevel),load(cached.lfoRate),load(cached.lfoDepth),static_cast<int>(load(cached.lfoDestination)));
             for(int osc=0;osc<4;++osc) {
                 const auto index=static_cast<size_t>(osc);
                 voice->setOscillator(osc,load(cached.oscillatorLevel[index]),load(cached.oscillatorSemitone[index]),
