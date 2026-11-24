@@ -1,7 +1,7 @@
 # Architecture
 
 - PluginProcessor: host integration, APVTS parameters, MIDI dispatch, versioned state and background sample-load job queue.
-- SynthVoice: four independent oscillator layers per voice, per-oscillator pitch/level/waveform, envelope and low-pass filter.
+- SynthVoice: four independent oscillator layers per voice, per-oscillator pitch/level/waveform, envelope, low-pass filter and per-voice LFO modulation to pitch/filter/amplitude.
 - SamplerEngine: 32 sample playback voices, up to 16 imported root-note zones, nearest-root selection, sample-rate conversion and MIDI note tracking.
 - BasicEffects: post-instrument drive, stereo width, chorus and reverb.
 - PluginEditor: native JUCE controls, oscillator layer panels, async sample import, waveform overview, embedded factory preset selector and user preset file actions.
