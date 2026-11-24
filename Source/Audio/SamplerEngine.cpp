@@ -55,6 +55,7 @@ void SamplerEngine::clearZones() noexcept {
  const juce::ScopedLock zoneGuard(zoneLock);
  zoneGeneration.fetch_add(1,std::memory_order_acq_rel);
  sampleZoneCount.store(0,std::memory_order_release);
+ for(auto& zone:sampleZones)zone.store(nullptr,std::memory_order_release);
  activeSample.store(nullptr,std::memory_order_release);
  const juce::ScopedLock previewGuard(previewLock);
  previewData.fill(0.0f);
