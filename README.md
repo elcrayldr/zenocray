@@ -16,7 +16,7 @@ Independent implementation of a Windows x64 virtual instrument using JUCE 8.0.6 
 
 ## Current limitations
 
-The sampler currently maps one imported sample across the keyboard from a selectable root note. Keygroups, velocity layers, loop and trim editing, a modulation matrix, LFOs and a full effects rack remain in development. Sample imports are decoded from the editor thread. Replaced sample buffers are retained until the plugin instance closes to guarantee safe audio-thread ownership, with a 512 MB retained-sample budget per plugin instance and a five-minute per-file limit.
+The sampler currently maps one imported sample across the keyboard from a selectable root note. Keygroups, velocity layers, loop and trim editing, a modulation matrix, LFOs and a full effects rack remain in development. Sample imports are decoded on a dedicated background worker. Replaced sample buffers are retained until the plugin instance closes to guarantee safe audio-thread ownership, with a 512 MB retained-sample budget per plugin instance and a five-minute per-file limit.
 
 This is a development prototype, not a release-ready product. Windows CI compilation is not equivalent to validation in FL Studio 26 and Cubase 13; host compatibility and realtime stress testing remain outstanding.
 
