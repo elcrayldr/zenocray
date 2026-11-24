@@ -45,7 +45,13 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
   sampleChooser=std::make_unique<juce::FileChooser>("Load audio sample",juce::File{},"*.wav;*.aif;*.aiff;*.flac");
   sampleChooser->launchAsync(juce::FileBrowserComponent::openMode|juce::FileBrowserComponent::canSelectFiles,[this](const juce::FileChooser& chooser){
    const auto file=chooser.getResult();
-   if(file.existsAsFile()){juce::String error;if(processor.loadSampleFromFile(file,error))sampleStatus.setText(file.getFileName(),juce::dontSendNotification);else sampleStatus.setText(error,juce::dontSendNotification);}
+   if(file.existsAsFile()){
+    sampleStatus.setText("LOADING SAMPLE...",juce::dontSendNotification);
+    juce::Component::SafePointer<CRAYLDRUrbanInstrumentsAudioProcessorEditor> safeThis(this);
+    processor.loadSampleFromFileAsync(file,[safeThis,file](bool success,juce::String error){
+     if(safeThis!=nullptr){safeThis->sampleStatus.setText(success?file.getFileName():error,juce::dontSendNotification);safeThis->repaint();}
+    });
+   }
    sampleChooser.reset();
   });
  };
