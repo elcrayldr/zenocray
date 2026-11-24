@@ -22,6 +22,11 @@ CRAYLDRUrbanInstrumentsAudioProcessorEditor::CRAYLDRUrbanInstrumentsAudioProcess
  subtitle.setFont(juce::Font(11.0f));subtitle.setColour(juce::Label::textColourId,muted);addAndMakeVisible(subtitle);
  loadSampleButton.setColour(juce::TextButton::buttonColourId,yellow);loadSampleButton.setColour(juce::TextButton::textColourOffId,bg);addAndMakeVisible(loadSampleButton);
  sampleStatus.setText(processor.getLoadedSampleName(),juce::dontSendNotification);sampleStatus.setColour(juce::Label::textColourId,muted);sampleStatus.setFont(juce::Font(10.0f));addAndMakeVisible(sampleStatus);
+ factoryPresetSelector.addItem("INIT SUB SINE",1);factoryPresetSelector.addItem("INIT URBAN SAW",2);
+ factoryPresetSelector.setTextWhenNothingSelected("FACTORY PRESETS");
+ factoryPresetSelector.setColour(juce::ComboBox::backgroundColourId,panel);factoryPresetSelector.setColour(juce::ComboBox::textColourId,juce::Colours::white);addAndMakeVisible(factoryPresetSelector);
+ factoryPresetSelector.onChange=[this]{if(factoryPresetSelector.getSelectedId()>0){juce::String error;if(!processor.loadFactoryPreset(factoryPresetSelector.getSelectedId(),error))sampleStatus.setText(error,juce::dontSendNotification);else sampleStatus.setText("FACTORY PRESET: "+factoryPresetSelector.getText(),juce::dontSendNotification);}};
+
  savePresetButton.setColour(juce::TextButton::buttonColourId,panel);savePresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(savePresetButton);
  loadPresetButton.setColour(juce::TextButton::buttonColourId,panel);loadPresetButton.setColour(juce::TextButton::textColourOffId,yellow);addAndMakeVisible(loadPresetButton);
  savePresetButton.onClick=[this]{
@@ -84,7 +89,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
  g.drawText("OSCILLATOR LAYERING",34,328,getWidth()-68,18,juce::Justification::left);
  g.drawText("SAMPLE EDITOR / WAVEFORM OVERVIEW",34,718,getWidth()-68,18,juce::Justification::left);
  const auto& preview=processor.getSamplePreview();
- const float center=785.0f, halfHeight=38.0f, x0=36.0f, usableWidth=static_cast<float>(getWidth())-72.0f;
+ const float center=785.0f, halfHeight=38.0f, x0=260.0f, usableWidth=static_cast<float>(getWidth())-296.0f;
  g.setColour(juce::Colour(0xff343840));g.drawLine(x0,center,x0+usableWidth,center,1.0f);
  g.setColour(yellow);
  for(size_t i=0;i<preview.size();++i){const float x=x0+usableWidth*static_cast<float>(i)/static_cast<float>(preview.size()-1);const float h=juce::jlimit(0.0f,1.0f,preview[i])*halfHeight;g.drawLine(x,center-h,x,center+h,1.2f);}
