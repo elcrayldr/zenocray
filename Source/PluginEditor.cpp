@@ -101,6 +101,7 @@ void CRAYLDRUrbanInstrumentsAudioProcessorEditor::paint(juce::Graphics& g){
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessorEditor::resized(){
+ factoryPresetSelector.setBounds(34,744,205,30);
  title.setBounds(24,18,600,38);subtitle.setBounds(26,58,600,20);savePresetButton.setBounds(getWidth()-454,26,130,32);loadPresetButton.setBounds(getWidth()-314,26,130,32);loadSampleButton.setBounds(getWidth()-174,26,150,32);sampleStatus.setBounds(getWidth()-454,62,430,20);
  const int globalX=34,globalY=140,globalW=92,gap=4;
  for(int i=0;i<11;++i){const int x=globalX+i*(globalW+gap);globalLabels[i].setBounds(x,globalY,globalW,20);globalControls[i].setBounds(x,globalY+20,globalW,122);}
