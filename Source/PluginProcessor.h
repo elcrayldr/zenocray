@@ -28,6 +28,7 @@ public:
     void setStateInformation(const void*, int) override;
     juce::AudioProcessorValueTreeState parameters;
     void loadSampleFromFileAsync(const juce::File& file, std::function<void(bool, juce::String)> completion);
+    void clearSampleZones() noexcept { sampler.clearZones(); }
     juce::String getLoadedSampleName() const { return sampler.getLoadedSampleName(); }
     std::array<float,256> getSamplePreview() const { return sampler.getPreviewData(); }
     bool savePresetToFile(const juce::File& file, juce::String& error);
