@@ -69,6 +69,7 @@ CRAYLDRUrbanInstrumentsAudioProcessor::~CRAYLDRUrbanInstrumentsAudioProcessor() 
 }
 
 void CRAYLDRUrbanInstrumentsAudioProcessor::loadSampleFromFileAsync(const juce::File& file,std::function<void(bool,juce::String)> completion) {
+    sampler.setRootNote(static_cast<int>(parameters.getRawParameterValue("sampleRoot")->load()));
     auto* job=new FunctionThreadPoolJob("CRAY LDR sample import",[this,file,completion=std::move(completion)]() mutable {
         juce::String error;
         const bool success=sampler.loadSampleFromFile(file,error);
